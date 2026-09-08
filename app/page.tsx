@@ -37,12 +37,22 @@ import {
   staggerContainerVariants,
   staggerItemVariants,
 } from "./components/MotionComponents";
+import { NavBar } from "@/components/ui/tubelight-navbar";
+import { Users, Sparkles, Sprout, Trees, BookOpen } from "lucide-react";
 
 export default function HomePage() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const shouldReduceMotion = useReducedMotion();
+
+  const navItems = [
+    { name: "Who We Are", url: "#who-we-are", icon: Users },
+    { name: "Our Focus", url: "#focus-areas", icon: Sparkles },
+    { name: "Sustainability", url: "#sustainability", icon: Sprout },
+    { name: "Seedling Hub", url: "#nursery", icon: Trees },
+    { name: "Our Story", url: "#founder", icon: BookOpen },
+  ];
 
   // GSAP Parallax Refs
   const heroSectionRef = useRef<HTMLElement>(null);
@@ -133,48 +143,22 @@ export default function HomePage() {
             </div>
           </a>
 
-          {/* Separate Frosted Glass Pill Menu on Right (as in attached design) */}
-          <nav className="hidden md:flex items-center bg-white/15 backdrop-blur-xl border border-white/20 rounded-full p-1.5 shadow-2xl text-white">
-            <a
-              href="#who-we-are"
-              className="px-4 py-1.5 rounded-full bg-white text-[#113B27] text-xs sm:text-sm font-semibold shadow-sm hover:bg-[#84C135] hover:text-[#091E14] transition-all"
-            >
-              Who We Are
-            </a>
-            <a
-              href="#focus-areas"
-              className="px-3.5 py-1.5 text-xs sm:text-sm font-medium text-white/85 hover:text-white rounded-full hover:bg-white/10 transition-colors"
-            >
-              Our Focus
-            </a>
-            <a
-              href="#sustainability"
-              className="px-3.5 py-1.5 text-xs sm:text-sm font-medium text-white/85 hover:text-white rounded-full hover:bg-white/10 transition-colors"
-            >
-              Sustainability
-            </a>
-            <a
-              href="#nursery"
-              className="px-3.5 py-1.5 text-xs sm:text-sm font-medium text-white/85 hover:text-white rounded-full hover:bg-white/10 transition-colors"
-            >
-              Seedling Hub
-            </a>
-            <a
-              href="#founder"
-              className="px-3.5 py-1.5 text-xs sm:text-sm font-medium text-white/85 hover:text-white rounded-full hover:bg-white/10 transition-colors"
-            >
-              Our Story
-            </a>
+          {/* Separate Frosted Glass Pill Menu on Right using Tubelight NavBar */}
+          <div className="hidden md:flex items-center gap-3 [--foreground:#FFFFFF] [--muted:rgba(255,255,255,0.15)] [--primary:#84C135] [--border:rgba(255,255,255,0.25)]">
+            <NavBar
+              items={navItems}
+              className="static sm:static left-auto bottom-auto sm:top-auto translate-x-0 mb-0 sm:pt-0 z-auto"
+            />
             <motion.a
               href="#sustainability"
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
-              className="ml-1 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#84C135] text-[#091E14] text-xs sm:text-sm font-semibold tracking-wide hover:bg-[#99D34C] transition-colors shadow-md"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#84C135] text-[#091E14] text-xs sm:text-sm font-semibold tracking-wide hover:bg-[#99D34C] transition-colors shadow-lg"
             >
               <span>Visit Farm</span>
               <FaArrowRight className="w-2.5 h-2.5" />
             </motion.a>
-          </nav>
+          </div>
 
           {/* Mobile Menu Toggle Button */}
           <motion.button
