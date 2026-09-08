@@ -107,66 +107,80 @@ export default function HomePage() {
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-8 pt-4 sm:pt-6 transition-all"
       >
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-5 sm:px-8 py-3 rounded-full bg-[#113B27]/90 backdrop-blur-xl border border-white/20 shadow-2xl text-white">
-          {/* Brand Logo */}
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          {/* Separate Brand Logo on Left (as in attached design) */}
           <a href="#" className="flex items-center gap-3 group">
             <motion.div
-              whileHover={{ scale: 1.1, rotate: 5 }}
+              whileHover={{ scale: 1.06 }}
               whileTap={{ scale: 0.95 }}
-              className="w-10 h-10 rounded-full bg-[#84C135] flex items-center justify-center text-[#113B27] shadow-md transition-transform"
+              className="w-11 h-11 rounded-full overflow-hidden bg-white border border-white/40 shadow-xl flex items-center justify-center shrink-0 relative transition-transform"
             >
-              <FaLeaf className="w-5 h-5 text-[#113B27]" />
+              <Image
+                src="/images/logo.jpg"
+                alt="Nettle Regenerative (K) Limited Logo"
+                fill
+                className="object-contain p-0.5"
+                priority
+              />
             </motion.div>
             <div className="flex flex-col">
-              <span className="font-bold text-base sm:text-lg tracking-tight leading-tight group-hover:text-[#84C135] transition-colors">
+              <span className="font-bold text-base sm:text-lg tracking-tight leading-tight text-white drop-shadow-md group-hover:text-[#84C135] transition-colors">
                 Nettle Regenerative
               </span>
-              <span className="text-[10px] text-[#84C135] tracking-wider uppercase font-semibold">
+              <span className="text-[10px] text-white/80 tracking-wider uppercase font-medium drop-shadow-sm">
                 Kilifi County, Kenya
               </span>
             </div>
           </a>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1 text-sm font-medium text-white/85">
-            {[
-              { label: "Who We Are", href: "#who-we-are" },
-              { label: "Our Focus", href: "#focus-areas" },
-              { label: "Sustainability", href: "#sustainability" },
-              { label: "Seedling Hub", href: "#nursery" },
-              { label: "Our Story", href: "#founder" },
-            ].map((link) => (
-              <motion.a
-                key={link.href}
-                href={link.href}
-                whileHover={{ scale: 1.05 }}
-                className="px-4 py-1.5 rounded-full hover:bg-white/10 hover:text-white transition-colors"
-              >
-                {link.label}
-              </motion.a>
-            ))}
-          </nav>
-
-          {/* CTA Button */}
-          <div className="hidden sm:flex items-center gap-3">
+          {/* Separate Frosted Glass Pill Menu on Right (as in attached design) */}
+          <nav className="hidden md:flex items-center bg-white/15 backdrop-blur-xl border border-white/20 rounded-full p-1.5 shadow-2xl text-white">
+            <a
+              href="#who-we-are"
+              className="px-4 py-1.5 rounded-full bg-white text-[#113B27] text-xs sm:text-sm font-semibold shadow-sm hover:bg-[#84C135] hover:text-[#091E14] transition-all"
+            >
+              Who We Are
+            </a>
+            <a
+              href="#focus-areas"
+              className="px-3.5 py-1.5 text-xs sm:text-sm font-medium text-white/85 hover:text-white rounded-full hover:bg-white/10 transition-colors"
+            >
+              Our Focus
+            </a>
+            <a
+              href="#sustainability"
+              className="px-3.5 py-1.5 text-xs sm:text-sm font-medium text-white/85 hover:text-white rounded-full hover:bg-white/10 transition-colors"
+            >
+              Sustainability
+            </a>
+            <a
+              href="#nursery"
+              className="px-3.5 py-1.5 text-xs sm:text-sm font-medium text-white/85 hover:text-white rounded-full hover:bg-white/10 transition-colors"
+            >
+              Seedling Hub
+            </a>
+            <a
+              href="#founder"
+              className="px-3.5 py-1.5 text-xs sm:text-sm font-medium text-white/85 hover:text-white rounded-full hover:bg-white/10 transition-colors"
+            >
+              Our Story
+            </a>
             <motion.a
               href="#sustainability"
-              whileHover={{ scale: 1.04, y: -1 }}
-              whileTap={{ scale: 0.97 }}
-              className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-[#84C135] text-[#091E14] text-xs sm:text-sm font-semibold tracking-wide hover:bg-[#99D34C] transition-colors shadow-lg"
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+              className="ml-1 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#84C135] text-[#091E14] text-xs sm:text-sm font-semibold tracking-wide hover:bg-[#99D34C] transition-colors shadow-md"
             >
-              <span>Visit Our Farm</span>
-              <span className="w-5 h-5 rounded-full bg-black/10 flex items-center justify-center text-[10px]">
-                <FaArrowRight className="w-2.5 h-2.5" />
-              </span>
+              <span>Visit Farm</span>
+              <FaArrowRight className="w-2.5 h-2.5" />
             </motion.a>
-          </div>
+          </nav>
 
           {/* Mobile Menu Toggle Button */}
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white focus:outline-none"
+            className="md:hidden w-10 h-10 rounded-full bg-white/15 backdrop-blur-xl border border-white/25 flex items-center justify-center text-white focus:outline-none shadow-xl"
             aria-label="Toggle menu"
           >
             {mobileMenuOpen ? <FaXmark className="w-4 h-4" /> : <FaBars className="w-4 h-4" />}
@@ -1102,8 +1116,13 @@ export default function HomePage() {
             {/* Brand Col */}
             <div className="md:col-span-1">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 rounded-full bg-[#84C135] flex items-center justify-center text-[#113B27] font-bold text-sm shadow-sm">
-                  <FaLeaf className="w-4 h-4 text-[#113B27]" />
+                <div className="w-11 h-11 rounded-full overflow-hidden bg-white border-2 border-[#84C135]/40 shadow-md flex items-center justify-center shrink-0 relative">
+                  <Image
+                    src="/images/logo.jpg"
+                    alt="Nettle Regenerative (K) Limited Logo"
+                    fill
+                    className="object-contain p-0.5"
+                  />
                 </div>
                 <span className="font-bold text-lg tracking-tight">Nettle Regenerative</span>
               </div>
