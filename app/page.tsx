@@ -38,6 +38,7 @@ import {
   staggerItemVariants,
 } from "./components/MotionComponents";
 import { NavBar } from "@/components/ui/tubelight-navbar";
+import { CurvedNavbar, iNavItem } from "@/components/ui/curved-menu";
 import { Users, Sparkles, Sprout, Trees, BookOpen } from "lucide-react";
 
 export default function HomePage() {
@@ -52,6 +53,34 @@ export default function HomePage() {
     { name: "Sustainability", url: "#sustainability", icon: Sprout },
     { name: "Seedling Hub", url: "#nursery", icon: Trees },
     { name: "Our Story", url: "#founder", icon: BookOpen },
+  ];
+
+  const mobileCurvedNavItems: iNavItem[] = [
+    {
+      heading: "Who We Are",
+      href: "#who-we-are",
+      subheading: "Community & Vision in Kilifi",
+    },
+    {
+      heading: "Our Focus",
+      href: "#focus-areas",
+      subheading: "Regenerative Farming Pillars",
+    },
+    {
+      heading: "Sustainability",
+      href: "#sustainability",
+      subheading: "Organic Practices & Soil Health",
+    },
+    {
+      heading: "Seedling Hub",
+      href: "#nursery",
+      subheading: "Indigenous & Fruit Tree Nursery",
+    },
+    {
+      heading: "Our Story",
+      href: "#founder",
+      subheading: "Founder Lenox Chome Kiponda",
+    },
   ];
 
   // GSAP Parallax Refs
@@ -171,41 +200,68 @@ export default function HomePage() {
           </motion.button>
         </div>
 
-        {/* Mobile Dropdown Drawer */}
-        <AnimatePresence>
+        {/* Mobile Curved Sidebar Drawer Menu */}
+        <AnimatePresence mode="wait">
           {mobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -15, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -15, scale: 0.96 }}
-              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-              className="md:hidden mt-2 p-5 rounded-3xl bg-[#113B27]/98 backdrop-blur-2xl border border-white/20 text-white shadow-2xl flex flex-col gap-3"
-            >
-              {[
-                { label: "Who We Are", href: "#who-we-are" },
-                { label: "Our Focus", href: "#focus-areas" },
-                { label: "Sustainability in Practice", href: "#sustainability" },
-                { label: "Plant Nursery", href: "#nursery" },
-                { label: "Founder's Journey", href: "#founder" },
-              ].map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="py-2 px-4 rounded-xl hover:bg-white/10 font-medium transition-colors"
-                >
-                  {link.label}
-                </a>
-              ))}
-              <a
-                href="#sustainability"
-                onClick={() => setMobileMenuOpen(false)}
-                className="mt-2 py-3 rounded-full bg-[#84C135] text-[#091E14] text-center font-semibold text-sm flex items-center justify-center gap-2"
-              >
-                <span>Visit Our Farm</span>
-                <FaArrowRight className="w-3 h-3" />
-              </a>
-            </motion.div>
+            <CurvedNavbar
+              setIsActive={setMobileMenuOpen}
+              navItems={mobileCurvedNavItems}
+              footer={
+                <div className="flex flex-col gap-4 px-6 sm:px-10 py-6 border-t border-black/10 bg-black/[0.02]">
+                  <a
+                    href="#sustainability"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full py-3.5 px-4 rounded-full bg-[#84C135] text-[#091E14] font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#99D34C] transition-colors shadow-md"
+                  >
+                    <span>Visit Our Farm</span>
+                    <FaArrowRight className="w-3 h-3" />
+                  </a>
+                  <div className="flex items-center justify-between pt-1 text-black/60">
+                    <span className="text-[11px] uppercase tracking-widest font-semibold text-black/50">
+                      Kilifi, Kenya
+                    </span>
+                    <div className="flex items-center gap-2.5">
+                      <a
+                        href="https://wa.me/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="WhatsApp"
+                        className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-black/70 hover:text-[#84C135] hover:bg-black/10 transition-colors"
+                      >
+                        <FaWhatsapp size={14} />
+                      </a>
+                      <a
+                        href="https://linkedin.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="LinkedIn"
+                        className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-black/70 hover:text-[#84C135] hover:bg-black/10 transition-colors"
+                      >
+                        <FaLinkedinIn size={14} />
+                      </a>
+                      <a
+                        href="https://instagram.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Instagram"
+                        className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-black/70 hover:text-[#84C135] hover:bg-black/10 transition-colors"
+                      >
+                        <FaInstagram size={14} />
+                      </a>
+                      <a
+                        href="https://x.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="X (Twitter)"
+                        className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-black/70 hover:text-[#84C135] hover:bg-black/10 transition-colors"
+                      >
+                        <FaXTwitter size={14} />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              }
+            />
           )}
         </AnimatePresence>
       </motion.header>
