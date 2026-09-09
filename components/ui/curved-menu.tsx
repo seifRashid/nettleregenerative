@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { motion, useMotionValue, AnimatePresence } from "framer-motion";
+import { motion, useMotionValue, AnimatePresence, type Variants } from "framer-motion";
 import Link from "next/link";
 import { X } from "lucide-react";
 import {
@@ -38,13 +38,95 @@ export interface iHeaderProps {
   className?: string;
 }
 
-export const MENU_SLIDE_ANIMATION = {
+export const MENU_SLIDE_ANIMATION: Variants = {
   initial: { x: "calc(100% + 100px)" },
   enter: { x: "0", transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] as const } },
   exit: {
     x: "calc(100% + 100px)",
     transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] as const },
   },
+};
+
+export const navItemVariants: Variants = {
+  initial: {
+    x: 60,
+    opacity: 0,
+  },
+  enter: (index: number) => ({
+    x: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.65,
+      ease: [0.76, 0, 0.24, 1] as const,
+      delay: 0.2 + index * 0.09,
+    },
+  }),
+  exit: (index: number) => ({
+    x: 50,
+    opacity: 0,
+    transition: {
+      duration: 0.35,
+      ease: [0.76, 0, 0.24, 1] as const,
+      delay: Math.max(0, 0.15 - index * 0.03),
+    },
+  }),
+};
+
+export const indexVariants: Variants = {
+  initial: {
+    opacity: 0,
+    x: -12,
+  },
+  enter: (index: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.33, 1, 0.68, 1] as const,
+      delay: 0.2 + index * 0.09,
+    },
+  }),
+};
+
+export const letterContainerVariants: Variants = {
+  initial: {},
+  enter: (index: number) => ({
+    transition: {
+      delayChildren: 0.25 + index * 0.09,
+      staggerChildren: 0.03,
+    },
+  }),
+};
+
+export const letterVariants: Variants = {
+  initial: {
+    y: "115%",
+    opacity: 0,
+  },
+  enter: {
+    y: "0%",
+    opacity: 1,
+    transition: {
+      duration: 0.45,
+      ease: [0.33, 1, 0.68, 1] as const,
+    },
+  },
+};
+
+export const subheadingVariants: Variants = {
+  initial: {
+    opacity: 0,
+    y: 8,
+  },
+  enter: (index: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.33, 1, 0.68, 1] as const,
+      delay: 0.35 + index * 0.09,
+    },
+  }),
 };
 
 export const defaultNavItems: iNavItem[] = [
@@ -124,20 +206,7 @@ export const NavLink: React.FC<iNavLinkProps> = ({
   setIsActive,
   index,
 }) => {
-  const ref = useRef<HTMLAnchorElement | null>(null);
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-
-  const handleMouseMove = (
-    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
-  ) => {
-    if (!ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-    x.set(mouseX / rect.width - 0.5);
-    y.set(mouseY / rect.height - 0.5);
-  };
+  const itemIndex = index - 1;
 
   const handleClick = () => {
     setIsActive(false);
@@ -150,57 +219,70 @@ export const NavLink: React.FC<iNavLinkProps> = ({
 
   return (
     <motion.div
-      onClick={handleClick}
+      custom={itemIndex}
+      variants={navItemVariants}
       initial="initial"
-      whileHover="whileHover"
+      animate="enter"
+      exit="exit"
+      whileHover={{ x: 6 }}
+      transition={{ type: "spring", stiffness: 400, damping: 28 }}
+      onClick={handleClick}
       className="group relative flex items-center justify-between border-b border-black/15 py-3 sm:py-4 transition-colors duration-300 uppercase cursor-pointer"
     >
       <Link
-        ref={ref}
-        onMouseMove={handleMouseMove}
         href={href}
         className="w-full flex flex-col"
         {...linkProps}
       >
         <div className="relative flex items-baseline">
-          <span className="text-black/40 group-hover:text-[#84C135] transition-colors duration-300 text-2xl sm:text-3xl font-light mr-3">
+          {/* Animated Index Number */}
+          <motion.span
+            custom={itemIndex}
+            variants={indexVariants}
+            initial="initial"
+            animate="enter"
+            exit="exit"
+            className="text-black/40 group-hover:text-[#84C135] transition-colors duration-300 text-2xl sm:text-3xl font-light mr-3 select-none"
+          >
             0{index}.
-          </span>
-          <div className="flex flex-row gap-0.5 overflow-hidden">
+          </motion.span>
+
+          {/* Staggered Letter Reveal on Entrance */}
+          <div className="overflow-hidden">
             <motion.span
-              variants={{
-                initial: { x: 0 },
-                whileHover: { x: -8 },
-              }}
-              transition={{
-                type: "spring",
-                staggerChildren: 0.04,
-                delayChildren: 0.1,
-              }}
-              className="relative z-10 block text-2xl sm:text-3xl md:text-4xl font-light tracking-tight text-black group-hover:text-[#113B27] transition-colors duration-300"
+              custom={itemIndex}
+              variants={letterContainerVariants}
+              initial="initial"
+              animate="enter"
+              exit="exit"
+              className="relative z-10 inline-flex flex-wrap text-2xl sm:text-3xl md:text-4xl font-light tracking-tight text-black group-hover:text-[#113B27] transition-colors duration-300"
             >
-              {heading.split("").map((letter, i) => {
-                return (
+              {heading.split("").map((letter, i) => (
+                <span key={i} className="overflow-hidden inline-block leading-tight">
                   <motion.span
-                    key={i}
-                    variants={{
-                      initial: { y: 0 },
-                      whileHover: { y: -3, color: "#84C135" },
-                    }}
-                    transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                    className="inline-block"
+                    variants={letterVariants}
+                    className="inline-block transform-gpu group-hover:text-[#84C135] transition-colors duration-200"
                   >
                     {letter === " " ? "\u00A0" : letter}
                   </motion.span>
-                );
-              })}
+                </span>
+              ))}
             </motion.span>
           </div>
         </div>
+
+        {/* Staggered Subheading Reveal */}
         {subheading && (
-          <span className="text-[11px] normal-case text-black/50 font-medium pl-9 -mt-0.5 tracking-normal">
+          <motion.span
+            custom={itemIndex}
+            variants={subheadingVariants}
+            initial="initial"
+            animate="enter"
+            exit="exit"
+            className="text-[11px] normal-case text-black/50 font-medium pl-9 -mt-0.5 tracking-normal group-hover:text-black/70 transition-colors"
+          >
             {subheading}
-          </span>
+          </motion.span>
         )}
       </Link>
     </motion.div>
@@ -282,7 +364,12 @@ export const CurvedNavbar: React.FC<iCurvedNavbarProps> = ({
         <div className="pt-8 px-6 sm:px-10 flex flex-col justify-between min-h-[calc(100%-80px)]">
           <div>
             {/* Header with Title and Close Button */}
-            <div className="flex items-center justify-between border-b border-black/15 pb-4 mb-4">
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.12, ease: [0.33, 1, 0.68, 1] as const }}
+              className="flex items-center justify-between border-b border-black/15 pb-4 mb-4"
+            >
               <span className="text-xs uppercase tracking-widest font-semibold text-black/60">
                 Navigation
               </span>
@@ -294,7 +381,7 @@ export const CurvedNavbar: React.FC<iCurvedNavbarProps> = ({
               >
                 <X size={18} />
               </button>
-            </div>
+            </motion.div>
 
             {/* Nav Items Section */}
             <section className="bg-transparent mt-2">

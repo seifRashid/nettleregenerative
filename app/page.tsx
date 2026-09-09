@@ -207,7 +207,12 @@ export default function HomePage() {
               setIsActive={setMobileMenuOpen}
               navItems={mobileCurvedNavItems}
               footer={
-                <div className="flex flex-col gap-4 px-6 sm:px-10 py-6 border-t border-black/10 bg-black/[0.02]">
+                <motion.div
+                  initial={{ opacity: 0, y: 25 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.55, delay: 0.72, ease: [0.33, 1, 0.68, 1] as const }}
+                  className="flex flex-col gap-4 px-6 sm:px-10 py-6 border-t border-black/10 bg-black/[0.02]"
+                >
                   <a
                     href="#sustainability"
                     onClick={() => setMobileMenuOpen(false)}
@@ -259,7 +264,7 @@ export default function HomePage() {
                       </a>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               }
             />
           )}
