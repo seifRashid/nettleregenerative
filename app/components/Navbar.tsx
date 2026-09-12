@@ -81,21 +81,21 @@ export function Navbar() {
       }`}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Brand Logo on Left with dark glass backing for universal legibility */}
+        {/* Brand Logo on Left */}
         <Link
           href="/"
-          className="flex items-center gap-3 group px-3 py-1.5 rounded-full bg-[#091E14]/70 backdrop-blur-md border border-white/15 shadow-md hover:bg-[#091E14]/85 transition-all"
+          className="flex items-center gap-3 group transition-opacity hover:opacity-90"
         >
           <motion.div
-            whileHover={{ scale: 1.08 }}
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="w-10 h-10 rounded-full overflow-hidden bg-white border border-white/40 shadow-sm flex items-center justify-center shrink-0 relative transition-transform"
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden bg-white border border-white/40 shadow-md flex items-center justify-center shrink-0 relative transition-transform"
           >
             <Image
               src="/images/logo.jpg"
               alt="Nettle Regenerative (K) Limited Logo"
               fill
-              className="object-contain p-0.5"
+              className="object-contain p-1"
               priority
             />
           </motion.div>

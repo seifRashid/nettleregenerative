@@ -15,7 +15,6 @@ import {
 import {
   Navbar,
   FooterSection,
-  FloatingDesignSystemBadge,
 } from "../components";
 
 export default function ContactUsPage() {
@@ -199,7 +198,6 @@ export default function ContactUsPage() {
       </main>
 
       <FooterSection />
-      <FloatingDesignSystemBadge />
     </div>
   );
 }

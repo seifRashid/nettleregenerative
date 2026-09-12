@@ -11,7 +11,6 @@ import {
   StoryCardsSection,
   ImmersiveBannerSection,
   FooterSection,
-  FloatingDesignSystemBadge,
 } from "./components";
 
 export default function HomePage() {
@@ -45,9 +44,6 @@ export default function HomePage() {
 
       {/* 9. Footer & Signature Newsletter Capsule */}
       <FooterSection />
-
-      {/* 10. Floating Design System Quick Access Badge */}
-      <FloatingDesignSystemBadge />
     </div>
   );
 }

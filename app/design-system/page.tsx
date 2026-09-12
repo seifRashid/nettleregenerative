@@ -233,13 +233,13 @@ export default function DesignSystemPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
           {/* Brand & System Title */}
           <div className="flex items-center gap-3.5">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-full overflow-hidden bg-white border border-white/40 shadow-lg flex items-center justify-center shrink-0 relative transition-transform group-hover:scale-105">
+            <Link href="/" className="flex items-center gap-3.5 group">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden bg-white border border-white/40 shadow-lg flex items-center justify-center shrink-0 relative transition-transform group-hover:scale-105">
                 <Image
                   src="/images/logo.jpg"
                   alt="Nettle Regenerative"
                   fill
-                  className="object-contain p-0.5"
+                  className="object-contain p-1"
                   priority
                 />
               </div>

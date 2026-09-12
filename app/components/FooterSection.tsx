@@ -100,13 +100,13 @@ export function FooterSection() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 py-12">
           {/* Brand Col */}
           <div className="md:col-span-1">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-11 h-11 rounded-full overflow-hidden bg-white border-2 border-[#84C135]/40 shadow-md flex items-center justify-center shrink-0 relative">
+            <div className="flex items-center gap-3.5 mb-4">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden bg-white border-2 border-[#84C135]/40 shadow-md flex items-center justify-center shrink-0 relative">
                 <Image
                   src="/images/logo.jpg"
                   alt="Nettle Regenerative (K) Limited Logo"
                   fill
-                  className="object-contain p-0.5"
+                  className="object-contain p-1"
                 />
               </div>
               <span className="font-bold text-lg tracking-tight">Nettle Regenerative &apos;K&apos; Limited</span>

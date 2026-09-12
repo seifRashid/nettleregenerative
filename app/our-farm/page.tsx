@@ -8,7 +8,6 @@ import {
   SustainabilitySection,
   StoryCardsSection,
   FooterSection,
-  FloatingDesignSystemBadge,
 } from "../components";
 
 export default function OurFarmPage() {
@@ -44,7 +43,6 @@ export default function OurFarmPage() {
       </main>
 
       <FooterSection />
-      <FloatingDesignSystemBadge />
     </div>
   );
 }

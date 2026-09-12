@@ -22,7 +22,6 @@ import {
 import {
   Navbar,
   FooterSection,
-  FloatingDesignSystemBadge,
   FadeIn,
   staggerContainerVariants,
   staggerItemVariants,
@@ -551,9 +550,8 @@ export default function AboutUsPage() {
         </section>
       </main>
 
-      {/* Footer & Floating Design System Badge */}
+      {/* Footer */}
       <FooterSection />
-      <FloatingDesignSystemBadge />
     </div>
   );
 }
