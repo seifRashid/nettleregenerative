@@ -12,6 +12,7 @@ import {
   FaLinkedinIn,
   FaInstagram,
   FaWhatsapp,
+  FaPhone,
 } from "react-icons/fa6";
 import { FadeIn } from "./MotionComponents";
 
@@ -32,7 +33,7 @@ export function FooterSection() {
     { icon: FaXTwitter, label: "Twitter / X", href: "#" },
     { icon: FaLinkedinIn, label: "LinkedIn", href: "#" },
     { icon: FaInstagram, label: "Instagram", href: "#" },
-    { icon: FaWhatsapp, label: "WhatsApp", href: "#" },
+    { icon: FaWhatsapp, label: "WhatsApp", href: "https://wa.me/254115198300" },
   ];
 
   return (
@@ -123,6 +124,12 @@ export function FooterSection() {
               <p className="flex items-center gap-2">
                 <FaEnvelope className="w-3 h-3 text-[#84C135]" />
                 <span>info@nettleregenerative.co.ke</span>
+              </p>
+              <p className="flex items-center gap-2">
+                <FaPhone className="w-3 h-3 text-[#84C135]" />
+                <a href="tel:+254115198300" className="hover:text-white transition-colors">
+                  +254 115 198 300
+                </a>
               </p>
             </div>
 

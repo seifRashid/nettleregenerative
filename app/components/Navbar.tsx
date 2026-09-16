@@ -164,7 +164,7 @@ export function Navbar() {
                   </span>
                   <div className="flex items-center gap-2.5">
                     <a
-                      href="https://wa.me/"
+                      href="https://wa.me/254115198300"
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label="WhatsApp"
