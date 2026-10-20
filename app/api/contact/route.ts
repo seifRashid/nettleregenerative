@@ -53,7 +53,7 @@ ${message}`;
       </div>
     `;
 
-    // 1. Store in email storage
+    // 1. Store in email storage (best-effort — Vercel filesystem is read-only)
     const emailRecord: EmailRecord = {
       id: `msg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
       inboundId: submissionId,
@@ -77,7 +77,17 @@ ${message}`;
       },
     };
 
-    await emailStorage.saveEmail(emailRecord);
+    try {
+      await emailStorage.saveEmail(emailRecord);
+    } catch (storageErr) {
+      // On Vercel and other read-only runtimes the local JSON store is unavailable.
+      // Log the warning but do NOT fail the request — the Resend notification below
+      // is the primary delivery mechanism.
+      console.warn(
+        "[Contact API] Storage write skipped (read-only filesystem):",
+        storageErr instanceof Error ? storageErr.message : storageErr
+      );
+    }
 
     // 2. Trigger notification to admin if Resend is configured (non-blocking)
     notifyAdminOfContactSubmission({

@@ -11,18 +11,23 @@ function getEnvVar(key: string): string | undefined {
   if (val && !val.startsWith("your_")) {
     return val;
   }
-  try {
-    const envPath = path.join(process.cwd(), ".env.local");
-    if (fs.existsSync(envPath)) {
-      const content = fs.readFileSync(envPath, "utf-8");
-      for (const line of content.split("\n")) {
-        const trimmed = line.trim();
-        if (trimmed.startsWith(`${key}=`)) {
-          return trimmed.substring(key.length + 1).trim();
+
+  // Only attempt filesystem fallback in local development (Vercel is read-only)
+  if (process.env.NODE_ENV !== "production") {
+    try {
+      const envPath = path.join(process.cwd(), ".env.local");
+      if (fs.existsSync(envPath)) {
+        const content = fs.readFileSync(envPath, "utf-8");
+        for (const line of content.split("\n")) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith(`${key}=`)) {
+            return trimmed.substring(key.length + 1).trim();
+          }
         }
       }
-    }
-  } catch {}
+    } catch {}
+  }
+
   return val;
 }
 
@@ -163,11 +168,22 @@ export async function POST(req: NextRequest) {
         headers: data.headers || {},
       };
 
-      await emailStorage.saveEmail(emailRecord);
+      try {
+        await emailStorage.saveEmail(emailRecord);
+      } catch (storageErr) {
+        console.warn(
+          "[Webhook] Storage write skipped (read-only filesystem):",
+          storageErr instanceof Error ? storageErr.message : storageErr
+        );
+      }
     }
 
-    // Mark event processed for deduplication
-    await emailStorage.markEventProcessed(eventId);
+    // Mark event processed for deduplication (best-effort)
+    try {
+      await emailStorage.markEventProcessed(eventId);
+    } catch {
+      // Ignore on read-only runtimes
+    }
 
     return NextResponse.json({ success: true, processedEventId: eventId });
   } catch (err) {
