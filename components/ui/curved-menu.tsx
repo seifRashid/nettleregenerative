@@ -39,92 +39,75 @@ export interface iHeaderProps {
 }
 
 export const MENU_SLIDE_ANIMATION: Variants = {
-  initial: { x: "calc(100% + 100px)" },
-  enter: { x: "0", transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] as const } },
+  initial: { x: "100%" },
+  enter: {
+    x: "0%",
+    transition: {
+      duration: 0.35,
+      ease: [0.16, 1, 0.3, 1] as const,
+    },
+  },
   exit: {
-    x: "calc(100% + 100px)",
-    transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] as const },
+    x: "100%",
+    transition: {
+      duration: 0.28,
+      ease: [0.16, 1, 0.3, 1] as const,
+    },
   },
 };
 
 export const navItemVariants: Variants = {
   initial: {
-    x: 60,
+    x: 25,
     opacity: 0,
   },
   enter: (index: number) => ({
     x: 0,
     opacity: 1,
     transition: {
-      duration: 0.65,
-      ease: [0.76, 0, 0.24, 1] as const,
-      delay: 0.2 + index * 0.09,
+      duration: 0.28,
+      ease: [0.16, 1, 0.3, 1] as const,
+      delay: 0.06 + index * 0.04,
     },
   }),
-  exit: (index: number) => ({
-    x: 50,
+  exit: {
+    x: 20,
     opacity: 0,
     transition: {
-      duration: 0.35,
-      ease: [0.76, 0, 0.24, 1] as const,
-      delay: Math.max(0, 0.15 - index * 0.03),
+      duration: 0.18,
+      ease: [0.16, 1, 0.3, 1] as const,
     },
-  }),
+  },
 };
 
 export const indexVariants: Variants = {
   initial: {
     opacity: 0,
-    x: -12,
+    x: -8,
   },
   enter: (index: number) => ({
     opacity: 1,
     x: 0,
     transition: {
-      duration: 0.5,
-      ease: [0.33, 1, 0.68, 1] as const,
-      delay: 0.2 + index * 0.09,
+      duration: 0.25,
+      ease: [0.16, 1, 0.3, 1] as const,
+      delay: 0.06 + index * 0.04,
     },
   }),
-};
-
-export const letterContainerVariants: Variants = {
-  initial: {},
-  enter: (index: number) => ({
-    transition: {
-      delayChildren: 0.25 + index * 0.09,
-      staggerChildren: 0.03,
-    },
-  }),
-};
-
-export const letterVariants: Variants = {
-  initial: {
-    y: "115%",
-    opacity: 0,
-  },
-  enter: {
-    y: "0%",
-    opacity: 1,
-    transition: {
-      duration: 0.45,
-      ease: [0.33, 1, 0.68, 1] as const,
-    },
-  },
 };
 
 export const subheadingVariants: Variants = {
   initial: {
     opacity: 0,
-    y: 8,
+    y: 4,
   },
   enter: (index: number) => ({
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.5,
-      ease: [0.33, 1, 0.68, 1] as const,
-      delay: 0.35 + index * 0.09,
+      duration: 0.25,
+      ease: [0.16, 1, 0.3, 1] as const,
+      delay: 0.1 + index * 0.04,
     },
   }),
 };
@@ -247,31 +230,15 @@ export const NavLink: React.FC<iNavLinkProps> = ({
             0{index}.
           </motion.span>
 
-          {/* Staggered Letter Reveal on Entrance */}
+          {/* Heading */}
           <div className="overflow-hidden">
-            <motion.span
-              custom={itemIndex}
-              variants={letterContainerVariants}
-              initial="initial"
-              animate="enter"
-              exit="exit"
-              className="relative z-10 inline-flex flex-wrap text-2xl sm:text-3xl md:text-4xl font-light tracking-tight text-black group-hover:text-[#113B27] transition-colors duration-300"
-            >
-              {heading.split("").map((letter, i) => (
-                <span key={i} className="overflow-hidden inline-block leading-tight">
-                  <motion.span
-                    variants={letterVariants}
-                    className="inline-block transform-gpu group-hover:text-[#84C135] transition-colors duration-200"
-                  >
-                    {letter === " " ? "\u00A0" : letter}
-                  </motion.span>
-                </span>
-              ))}
-            </motion.span>
+            <span className="relative z-10 inline-flex flex-wrap text-2xl sm:text-3xl md:text-4xl font-light tracking-tight text-black group-hover:text-[#113B27] transition-colors duration-300">
+              {heading}
+            </span>
           </div>
         </div>
 
-        {/* Staggered Subheading Reveal */}
+        {/* Subheading */}
         {subheading && (
           <motion.span
             custom={itemIndex}
@@ -306,17 +273,17 @@ export const Curve: React.FC<{ fill?: string }> = ({ fill = "#ffffff" }) => {
     initial: { d: initialPath },
     enter: {
       d: targetPath,
-      transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] as const },
+      transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] as const },
     },
     exit: {
       d: initialPath,
-      transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] as const },
+      transition: { duration: 0.28, ease: [0.16, 1, 0.3, 1] as const },
     },
   };
 
   return (
     <svg
-      className="absolute top-0 -left-[99px] w-[100px] stroke-none h-full pointer-events-none"
+      className="hidden sm:block absolute top-0 -left-[99px] w-[100px] stroke-none h-full pointer-events-none"
       style={{ fill }}
       aria-hidden="true"
     >
@@ -344,9 +311,9 @@ export const CurvedNavbar: React.FC<iCurvedNavbarProps> = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.4 }}
+        transition={{ duration: 0.25 }}
         onClick={() => setIsActive(false)}
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
         aria-hidden="true"
       />
 
@@ -357,7 +324,7 @@ export const CurvedNavbar: React.FC<iCurvedNavbarProps> = ({
         animate="enter"
         exit="exit"
         className={cn(
-          "h-[100dvh] w-[88vw] sm:w-[420px] max-w-screen-sm fixed right-0 top-0 z-50 bg-white shadow-2xl flex flex-col justify-between overflow-y-auto",
+          "h-[100dvh] w-[88vw] sm:w-[420px] max-w-screen-sm fixed right-0 top-0 z-50 bg-white shadow-2xl rounded-l-[28px] sm:rounded-none flex flex-col justify-between overflow-y-auto transform-gpu will-change-transform",
           className,
         )}
       >
@@ -367,7 +334,7 @@ export const CurvedNavbar: React.FC<iCurvedNavbarProps> = ({
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.12, ease: [0.33, 1, 0.68, 1] as const }}
+              transition={{ duration: 0.25, delay: 0.08, ease: [0.16, 1, 0.3, 1] as const }}
               className="flex items-center justify-between border-b border-black/15 pb-4 mb-4"
             >
               <span className="text-xs uppercase tracking-widest font-semibold text-black/60">
@@ -376,7 +343,7 @@ export const CurvedNavbar: React.FC<iCurvedNavbarProps> = ({
               <button
                 type="button"
                 onClick={() => setIsActive(false)}
-                className="w-9 h-9 rounded-full bg-black/5 hover:bg-[#84C135]/20 flex items-center justify-center text-black/70 hover:text-black transition-colors focus:outline-none"
+                className="w-9 h-9 rounded-full bg-black/5 hover:bg-[#84C135]/20 flex items-center justify-center text-black/70 hover:text-black transition-colors focus:outline-none cursor-pointer"
                 aria-label="Close menu"
               >
                 <X size={18} />
@@ -410,6 +377,7 @@ export const CurvedNavbar: React.FC<iCurvedNavbarProps> = ({
     </>
   );
 };
+
 
 export const Header: React.FC<iHeaderProps> = ({
   navItems = defaultNavItems,

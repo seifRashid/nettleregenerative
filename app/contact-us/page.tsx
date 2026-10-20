@@ -99,11 +99,42 @@ function ContactFormContent() {
 
     setIsSubmitting(true);
 
-    // Simulate reliable submission flow with feedback
-    await new Promise((resolve) => setTimeout(resolve, 850));
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (data.errors) {
+          setErrors(data.errors);
+        } else {
+          setErrors({ form: data.error || "Submission failed. Please try again." });
+        }
+        setIsSubmitting(false);
+        return;
+      }
+
+      setIsSubmitting(false);
+      setIsSubmitted(true);
+    } catch (err: any) {
+      clearTimeout(timeoutId);
+      const isTimeout = err?.name === "AbortError";
+      setErrors({
+        form: isTimeout
+          ? "Request timed out. Please check your connection and try again."
+          : "Network error occurred. Please try again.",
+      });
+      setIsSubmitting(false);
+    }
   };
 
   const handleReset = () => {
@@ -173,6 +204,12 @@ function ContactFormContent() {
           Fill out the details below and our team in Baolala will get back to you promptly.
         </p>
       </div>
+
+      {errors.form && (
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm font-medium">
+          {errors.form}
+        </div>
+      )}
 
       {/* Name and Email Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

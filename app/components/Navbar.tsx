@@ -70,10 +70,11 @@ export function Navbar() {
   }, []);
 
   return (
-    <motion.header
-      initial={{ y: -60, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+    <>
+      <motion.header
+        initial={{ y: -60, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       className={`fixed top-0 left-0 right-0 z-50 px-4 sm:px-8 transition-all duration-300 ${
         scrolled
           ? "py-3 bg-[#091E14]/90 backdrop-blur-xl border-b border-white/15 shadow-xl"
@@ -136,76 +137,77 @@ export function Navbar() {
           {mobileMenuOpen ? <FaXmark className="w-4 h-4" /> : <FaBars className="w-4 h-4" />}
         </motion.button>
       </div>
-
-      {/* Mobile Curved Sidebar Drawer Menu */}
-      <AnimatePresence mode="wait">
-        {mobileMenuOpen && (
-          <CurvedNavbar
-            setIsActive={setMobileMenuOpen}
-            navItems={mobileCurvedNavItems}
-            footer={
-              <motion.div
-                initial={{ opacity: 0, y: 25 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.55, delay: 0.72, ease: [0.33, 1, 0.68, 1] as const }}
-                className="flex flex-col gap-4 px-6 sm:px-10 py-6 border-t border-black/10 bg-black/[0.02]"
-              >
-                <Link
-                  href="/contact-us"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full py-3.5 px-4 rounded-full bg-[#84C135] text-[#091E14] font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#99D34C] transition-colors shadow-md"
-                >
-                  <span>Visit Our Farm</span>
-                  <FaArrowRight className="w-3 h-3" />
-                </Link>
-                <div className="flex items-center justify-between pt-1 text-black/60">
-                  <span className="text-[11px] uppercase tracking-widest font-semibold text-black/50">
-                    Kilifi, Kenya
-                  </span>
-                  <div className="flex items-center gap-2.5">
-                    <a
-                      href="https://wa.me/254115198300"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="WhatsApp"
-                      className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-black/70 hover:text-[#84C135] hover:bg-black/10 transition-colors"
-                    >
-                      <FaWhatsapp size={14} />
-                    </a>
-                    <a
-                      href="https://linkedin.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="LinkedIn"
-                      className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-black/70 hover:text-[#84C135] hover:bg-black/10 transition-colors"
-                    >
-                      <FaLinkedinIn size={14} />
-                    </a>
-                    <a
-                      href="https://instagram.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="Instagram"
-                      className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-black/70 hover:text-[#84C135] hover:bg-black/10 transition-colors"
-                    >
-                      <FaInstagram size={14} />
-                    </a>
-                    <a
-                      href="https://x.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="X (Twitter)"
-                      className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-black/70 hover:text-[#84C135] hover:bg-black/10 transition-colors"
-                    >
-                      <FaXTwitter size={14} />
-                    </a>
-                  </div>
-                </div>
-              </motion.div>
-            }
-          />
-        )}
-      </AnimatePresence>
     </motion.header>
+
+    {/* Mobile Curved Sidebar Drawer Menu */}
+    <AnimatePresence>
+      {mobileMenuOpen && (
+        <CurvedNavbar
+          setIsActive={setMobileMenuOpen}
+          navItems={mobileCurvedNavItems}
+          footer={
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.28, delay: 0.16, ease: [0.16, 1, 0.3, 1] as const }}
+              className="flex flex-col gap-4 px-6 sm:px-10 py-6 border-t border-black/10 bg-black/[0.02]"
+            >
+              <Link
+                href="/contact-us"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full py-3.5 px-4 rounded-full bg-[#84C135] text-[#091E14] font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#99D34C] transition-colors shadow-md"
+              >
+                <span>Visit Our Farm</span>
+                <FaArrowRight className="w-3 h-3" />
+              </Link>
+              <div className="flex items-center justify-between pt-1 text-black/60">
+                <span className="text-[11px] uppercase tracking-widest font-semibold text-black/50">
+                  Kilifi, Kenya
+                </span>
+                <div className="flex items-center gap-2.5">
+                  <a
+                    href="https://wa.me/254115198300"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="WhatsApp"
+                    className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-black/70 hover:text-[#84C135] hover:bg-black/10 transition-colors"
+                  >
+                    <FaWhatsapp size={14} />
+                  </a>
+                  <a
+                    href="https://linkedin.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="LinkedIn"
+                    className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-black/70 hover:text-[#84C135] hover:bg-black/10 transition-colors"
+                  >
+                    <FaLinkedinIn size={14} />
+                  </a>
+                  <a
+                    href="https://instagram.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram"
+                    className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-black/70 hover:text-[#84C135] hover:bg-black/10 transition-colors"
+                  >
+                    <FaInstagram size={14} />
+                  </a>
+                  <a
+                    href="https://x.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="X (Twitter)"
+                    className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-black/70 hover:text-[#84C135] hover:bg-black/10 transition-colors"
+                  >
+                    <FaXTwitter size={14} />
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          }
+        />
+      )}
+    </AnimatePresence>
+  </>
   );
 }
