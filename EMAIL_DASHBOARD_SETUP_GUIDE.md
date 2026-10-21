@@ -107,21 +107,19 @@ When an admin clicks **Reply** in `/admin/emails`:
 
 ---
 
-## 6. Storage Architecture & Production Deployment
+## 6. Storage Architecture (Neon PostgreSQL)
 
-### 6.1 Local Development Storage
-- **Emails:** `data/emails.json`
-- **Replies:** `data/email-replies.json`
-- **Processed Event IDs (Deduplication):** `data/processed-events.json`
-- **Concurrency & Safety:** All writes are protected by an asynchronous mutex queue (`AsyncLock`) and atomic temporary-file swaps (`.tmp` + rename) to prevent race conditions and file corruption.
+The system uses a dedicated **Neon PostgreSQL** database (`@neondatabase/serverless`) via `PostgresStorageAdapter` for both local development and production.
 
-### 6.2 Production Considerations (e.g. Vercel)
-> **Crucial Warning:** Serverless platforms like Vercel have an **ephemeral filesystem**. Any file written to the `/data` folder during a serverless function invocation is lost when the lambda spins down or redeploys, and cannot be shared across concurrent lambdas.
+### Database Tables:
+- **`emails`**: Inbound emails and contact form inquiries with threading, status flags, and metadata.
+- **`email_replies`**: Outgoing replies and incoming thread responses linked to parent conversations.
+- **`processed_events`**: Unique webhook event tracking for deduplication.
 
-**Recommended Production Options:**
-- **Option A (Self-hosted Node / VPS / Docker / Railway / Render):** The local JSON storage works permanently if mounted on a persistent volume.
-- **Option B (Vercel KV / Upstash Redis / Vercel Blob):** The modular `StorageAdapter` interface in [`lib/email/storage-types.ts`](lib/email/storage-types.ts) allows replacing the `JsonFileStorageAdapter` with a KV or Redis adapter with zero modifications to the UI, routes, or reply workflows.
-- **Option C (PostgreSQL / Neon / Supabase):** Implement the `StorageAdapter` methods (`getEmails`, `saveEmail`, `updateEmail`, `addReply`, etc.) backed by SQL tables.
+### Environment Variable:
+```env
+DATABASE_URL=postgresql://neondb_owner:npg_Heqnj68YrxlG@ep-lucky-hall-b7uztko8-pooler.c-13.us-east-1.aws.neon.tech/neondb?sslmode=require
+```
 
 ---
 
