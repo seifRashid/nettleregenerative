@@ -367,6 +367,33 @@ export default function AdminEmailsDashboard() {
     }
   };
 
+  const [simulatingReply, setSimulatingReply] = useState(false);
+
+  const handleSimulateCustomerReply = async (email: EmailRecord) => {
+    setSimulatingReply(true);
+    try {
+      const res = await fetch(`/api/emails/${email.id}/simulate-customer-reply`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: `Hi Nettle Regenerative team, thanks for following up! We received your message and wanted to confirm everything looks great. Looking forward to our next steps!`,
+        }),
+      });
+
+      if (res.ok) {
+        showToast("Customer reply received in conversation thread!", "success");
+        await fetchEmailDetail(email.id);
+        await fetchEmails();
+      } else {
+        showToast("Failed to record customer reply", "error");
+      }
+    } catch {
+      showToast("Network error simulating reply", "error");
+    } finally {
+      setSimulatingReply(false);
+    }
+  };
+
   // Logout
   const handleLogout = async () => {
     try {
@@ -844,6 +871,21 @@ export default function AdminEmailsDashboard() {
 
                   <button
                     type="button"
+                    onClick={() => handleSimulateCustomerReply(selectedEmail)}
+                    disabled={simulatingReply}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#FAF7F3] hover:bg-[#F2ECE4] text-[#654320] border border-[#654320]/20 rounded-xl text-xs font-semibold shadow-xs transition-colors"
+                    title="Simulate receiving an inbound reply from customer (for testing without live DNS/webhook)"
+                  >
+                    {simulatingReply ? (
+                      <FaSpinner className="w-3 h-3 animate-spin text-[#84C135]" />
+                    ) : (
+                      <FaEnvelopeOpen className="w-3 h-3 text-[#84C135]" />
+                    )}
+                    <span className="hidden sm:inline">Simulate Reply</span>
+                  </button>
+
+                  <button
+                    type="button"
                     onClick={() => handleToggleStar(selectedEmail)}
                     className="p-2 text-[#52665B] hover:text-amber-500 rounded-xl hover:bg-[#F7F9F6] transition-colors"
                     title={selectedEmail.isStarred ? "Unstar" : "Star"}
@@ -980,48 +1022,74 @@ export default function AdminEmailsDashboard() {
                   </div>
                 </div>
 
-                {/* Sent Conversation Replies Thread */}
+                {/* Conversation Replies Thread */}
                 {replies.length > 0 && (
                   <div className="space-y-4">
                     <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#708579]">
                       <FaReply className="w-3 h-3" />
-                      <span>Sent Replies ({replies.length})</span>
+                      <span>Conversation History ({replies.length})</span>
                     </div>
 
-                    {replies.map((reply, idx) => (
-                      <div
-                        key={reply.id || idx}
-                        className="bg-white rounded-3xl p-5 border border-[#113B27]/10 shadow-xs space-y-3 pl-6 border-l-4 border-l-[#113B27]"
-                      >
-                        <div className="flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-2 font-bold text-[#113B27]">
-                            <span>You replied</span>
-                            <span className="text-[10px] text-[#708579] font-normal">
-                              via {reply.from}
+                    {replies.map((reply, idx) => {
+                      const isCustomer =
+                        reply.from.toLowerCase() === selectedEmail.senderEmail.toLowerCase() ||
+                        (!reply.from.toLowerCase().includes("nettleregenerativefarm.com") &&
+                          !reply.from.toLowerCase().includes("nettleregenerative.com"));
+
+                      return (
+                        <div
+                          key={reply.id || idx}
+                          className={`rounded-3xl p-5 border shadow-xs space-y-3 pl-6 border-l-4 ${
+                            isCustomer
+                              ? "bg-[#FCFDFB] border-l-[#84C135] border-[#84C135]/30"
+                              : "bg-white border-l-[#113B27] border-[#113B27]/10"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-2 font-bold">
+                              {isCustomer ? (
+                                <>
+                                  <span className="text-[#113B27]">{selectedEmail.senderName}</span>
+                                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#EBF7D9] text-[#113B27] font-semibold border border-[#84C135]/30">
+                                    Customer Reply
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  <span className="text-[#113B27]">You replied</span>
+                                  <span className="text-[10px] text-[#708579] font-normal">
+                                    via {reply.from}
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                            <span className="text-[11px] text-[#708579]">
+                              {new Date(reply.sentAt).toLocaleString([], {
+                                dateStyle: "medium",
+                                timeStyle: "short",
+                              })}
                             </span>
                           </div>
-                          <span className="text-[11px] text-[#708579]">
-                            {new Date(reply.sentAt).toLocaleString([], {
-                              dateStyle: "medium",
-                              timeStyle: "short",
-                            })}
-                          </span>
-                        </div>
 
-                        <div className="text-xs text-[#708579]">
-                          To: <span className="text-[#11231A] font-medium">{reply.to}</span>
-                        </div>
+                          <div className="text-xs text-[#708579]">
+                            {isCustomer ? (
+                              <>From: <span className="text-[#11231A] font-medium">{reply.from}</span></>
+                            ) : (
+                              <>To: <span className="text-[#11231A] font-medium">{reply.to}</span></>
+                            )}
+                          </div>
 
-                        <div className="text-sm text-[#11231A] leading-relaxed whitespace-pre-wrap pt-1">
-                          {reply.bodyText}
-                        </div>
+                          <div className="text-sm text-[#11231A] leading-relaxed whitespace-pre-wrap pt-1 font-sans">
+                            {reply.bodyText}
+                          </div>
 
-                        <div className="pt-2 flex items-center justify-between text-[10px] text-[#708579] border-t border-[#113B27]/5">
-                          <span>Status: {reply.status}</span>
-                          {reply.resendId && <span>Resend ID: {reply.resendId}</span>}
+                          <div className="pt-2 flex items-center justify-between text-[10px] text-[#708579] border-t border-[#113B27]/5">
+                            <span>Status: {reply.status}</span>
+                            {reply.resendId && <span>ID: {reply.resendId}</span>}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
 

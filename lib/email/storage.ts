@@ -1,5 +1,5 @@
 import fs from "fs/promises";
-import fsSync from "fs";
+import * as fsSync from "fs";
 import path from "path";
 import {
   EmailRecord,
@@ -9,30 +9,11 @@ import {
   StorageAdapter,
 } from "./storage-types";
 
-// Base directory resolver for file storage (handles execution from either workspace root or my-app)
-function resolveDataDir(): string {
-  if (process.env.DATA_DIR) {
-    return path.resolve(process.env.DATA_DIR);
-  }
-  const cwd = process.cwd();
-  if (fsSync.existsSync(path.join(cwd, "my-app", "data"))) {
-    return path.join(cwd, "my-app", "data");
-  }
-  if (fsSync.existsSync(path.join(cwd, "my-app", "package.json"))) {
-    return path.join(cwd, "my-app", "data");
-  }
-  return path.join(cwd, "data");
-}
-
-function getDataPaths() {
-  const dir = resolveDataDir();
-  return {
-    dir,
-    emailsFile: path.join(dir, "emails.json"),
-    repliesFile: path.join(dir, "email-replies.json"),
-    eventsFile: path.join(dir, "processed-events.json"),
-  };
-}
+// Base directory for file storage
+const DATA_DIR = path.join(process.cwd(), "data");
+const EMAILS_FILE = path.join(DATA_DIR, "emails.json");
+const REPLIES_FILE = path.join(DATA_DIR, "email-replies.json");
+const EVENTS_FILE = path.join(DATA_DIR, "processed-events.json");
 
 // Mutex queue to prevent concurrent write collisions
 class AsyncLock {
@@ -64,28 +45,27 @@ export class JsonFileStorageAdapter implements StorageAdapter {
 
     this.initPromise = (async () => {
       try {
-        const { dir, emailsFile, repliesFile, eventsFile } = getDataPaths();
-        await fs.mkdir(dir, { recursive: true });
+        await fs.mkdir(DATA_DIR, { recursive: true });
 
         // Initialize emails file if absent
         try {
-          await fs.access(emailsFile);
+          await fs.access(EMAILS_FILE);
         } catch {
-          await this.atomicWrite(emailsFile, JSON.stringify(INITIAL_SEED_EMAILS, null, 2));
+          await this.atomicWrite(EMAILS_FILE, JSON.stringify(INITIAL_SEED_EMAILS, null, 2));
         }
 
         // Initialize replies file if absent
         try {
-          await fs.access(repliesFile);
+          await fs.access(REPLIES_FILE);
         } catch {
-          await this.atomicWrite(repliesFile, JSON.stringify(INITIAL_SEED_REPLIES, null, 2));
+          await this.atomicWrite(REPLIES_FILE, JSON.stringify(INITIAL_SEED_REPLIES, null, 2));
         }
 
         // Initialize processed events file if absent
         try {
-          await fs.access(eventsFile);
+          await fs.access(EVENTS_FILE);
         } catch {
-          await this.atomicWrite(eventsFile, JSON.stringify([], null, 2));
+          await this.atomicWrite(EVENTS_FILE, JSON.stringify([], null, 2));
         }
 
         this.initialized = true;
@@ -104,8 +84,6 @@ export class JsonFileStorageAdapter implements StorageAdapter {
    * Atomic file writing with Windows-safe fallback (handles EPERM on Windows rename)
    */
   private async atomicWrite(filePath: string, data: string): Promise<void> {
-    const parentDir = path.dirname(filePath);
-    await fs.mkdir(parentDir, { recursive: true });
     const tmpPath = `${filePath}.${Date.now()}.${Math.random().toString(36).substring(2, 7)}.tmp`;
     try {
       await fs.writeFile(tmpPath, data, "utf-8");
@@ -126,8 +104,7 @@ export class JsonFileStorageAdapter implements StorageAdapter {
   private async readEmails(): Promise<EmailRecord[]> {
     await this.ensureInitialized();
     try {
-      const { emailsFile } = getDataPaths();
-      const content = await fs.readFile(/* turbopackIgnore: true */ emailsFile, "utf-8");
+      const content = await fs.readFile(EMAILS_FILE, "utf-8");
       return JSON.parse(content) as EmailRecord[];
     } catch {
       return [];
@@ -135,15 +112,13 @@ export class JsonFileStorageAdapter implements StorageAdapter {
   }
 
   private async writeEmails(emails: EmailRecord[]): Promise<void> {
-    const { emailsFile } = getDataPaths();
-    await this.atomicWrite(emailsFile, JSON.stringify(emails, null, 2));
+    await this.atomicWrite(EMAILS_FILE, JSON.stringify(emails, null, 2));
   }
 
   private async readReplies(): Promise<EmailReplyRecord[]> {
     await this.ensureInitialized();
     try {
-      const { repliesFile } = getDataPaths();
-      const content = await fs.readFile(/* turbopackIgnore: true */ repliesFile, "utf-8");
+      const content = await fs.readFile(REPLIES_FILE, "utf-8");
       return JSON.parse(content) as EmailReplyRecord[];
     } catch {
       return [];
@@ -151,15 +126,13 @@ export class JsonFileStorageAdapter implements StorageAdapter {
   }
 
   private async writeReplies(replies: EmailReplyRecord[]): Promise<void> {
-    const { repliesFile } = getDataPaths();
-    await this.atomicWrite(repliesFile, JSON.stringify(replies, null, 2));
+    await this.atomicWrite(REPLIES_FILE, JSON.stringify(replies, null, 2));
   }
 
   private async readEvents(): Promise<string[]> {
     await this.ensureInitialized();
     try {
-      const { eventsFile } = getDataPaths();
-      const content = await fs.readFile(/* turbopackIgnore: true */ eventsFile, "utf-8");
+      const content = await fs.readFile(EVENTS_FILE, "utf-8");
       return JSON.parse(content) as string[];
     } catch {
       return [];
@@ -167,8 +140,7 @@ export class JsonFileStorageAdapter implements StorageAdapter {
   }
 
   private async writeEvents(events: string[]): Promise<void> {
-    const { eventsFile } = getDataPaths();
-    await this.atomicWrite(eventsFile, JSON.stringify(events, null, 2));
+    await this.atomicWrite(EVENTS_FILE, JSON.stringify(events, null, 2));
   }
 
   async getEmails(filter?: EmailFilter): Promise<{ emails: EmailRecord[]; total: number }> {
@@ -208,7 +180,7 @@ export class JsonFileStorageAdapter implements StorageAdapter {
           filtered = filtered.filter((e) => e.isDeleted);
           break;
         case "sent":
-          filtered = filtered.filter((e) => (replyCountMap.get(e.id) || 0) > 0 && !e.isDeleted);
+          // Handled via getAllReplies or emails with replies
           break;
       }
     } else {
@@ -407,5 +379,52 @@ export class JsonFileStorageAdapter implements StorageAdapter {
   }
 }
 
+function getEnvVar(key: string): string | undefined {
+  const val = process.env[key];
+  if (val && !val.startsWith("your_")) {
+    return val;
+  }
+  if (process.env.NODE_ENV !== "production") {
+    try {
+      const candidates = [
+        path.join(process.cwd(), ".env.local"),
+        path.join(process.cwd(), "my-app", ".env.local"),
+      ];
+      for (const envPath of candidates) {
+        if (fsSync.existsSync(envPath)) {
+          const content = fsSync.readFileSync(envPath, "utf-8");
+          for (const line of content.split("\n")) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith(`${key}=`)) {
+              return trimmed.substring(key.length + 1).trim();
+            }
+          }
+        }
+      }
+    } catch {}
+  }
+  return val;
+}
+
+export function createStorageAdapter(): StorageAdapter {
+  const dbUrl =
+    getEnvVar("DATABASE_URL") ||
+    getEnvVar("POSTGRES_URL") ||
+    getEnvVar("NEON_DATABASE_URL") ||
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL;
+
+  const storageType = getEnvVar("STORAGE_TYPE") || process.env.STORAGE_TYPE;
+
+  if ((dbUrl && storageType !== "file") || storageType === "postgres") {
+    if (dbUrl) {
+      const { PostgresStorageAdapter } = require("./postgres-storage");
+      return new PostgresStorageAdapter(dbUrl);
+    }
+  }
+
+  return new JsonFileStorageAdapter();
+}
+
 // Global singleton storage adapter instance
-export const emailStorage: StorageAdapter = new JsonFileStorageAdapter();
+export const emailStorage: StorageAdapter = createStorageAdapter();
