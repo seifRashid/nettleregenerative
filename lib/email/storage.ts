@@ -95,8 +95,12 @@ export class JsonFileStorageAdapter implements StorageAdapter {
         await fs.unlink(tmpPath).catch(() => {});
       }
     } catch {
-      // Fallback: direct atomic write to target file
-      await fs.writeFile(filePath, data, "utf-8");
+      // Fallback: direct write to target file, with safe catch for read-only runtimes
+      try {
+        await fs.writeFile(filePath, data, "utf-8");
+      } catch (err) {
+        console.warn(`[JsonFileStorageAdapter] File write skipped on read-only runtime (${filePath})`);
+      }
     }
   }
 

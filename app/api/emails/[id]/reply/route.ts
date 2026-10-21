@@ -71,17 +71,27 @@ export async function POST(
       status: sendResult.status,
     };
 
-    await emailStorage.addReply(replyRecord);
+    let storageSaved = false;
+    try {
+      await emailStorage.addReply(replyRecord);
+      storageSaved = true;
 
-    // Also mark original email as read
-    if (!email.isRead) {
-      await emailStorage.updateEmail(email.id, { isRead: true });
+      // Also mark original email as read
+      if (!email.isRead) {
+        await emailStorage.updateEmail(email.id, { isRead: true });
+      }
+    } catch (storageErr) {
+      console.warn(
+        "[Reply API] Reply storage persistence failed:",
+        storageErr instanceof Error ? storageErr.message : storageErr
+      );
     }
 
     return NextResponse.json({
       success: true,
       reply: replyRecord,
       simulated: sendResult.status === "simulated",
+      storageSaved,
       message:
         sendResult.status === "simulated"
           ? "Reply recorded in development mode (configure RESEND_API_KEY in .env.local for live dispatch)"
@@ -89,6 +99,7 @@ export async function POST(
     });
   } catch (err) {
     console.error("[POST /api/emails/[id]/reply Error]:", err);
-    return NextResponse.json({ error: "An unexpected error occurred while processing reply" }, { status: 500 });
+    const msg = err instanceof Error ? err.message : "An unexpected error occurred while processing reply";
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
