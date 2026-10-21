@@ -136,45 +136,110 @@ export async function POST(req: NextRequest) {
 
       bodyText = bodyText || (bodyHtml ? bodyHtml.replace(/<[^>]+>/g, " ") : "(Empty message)");
 
-      // Thread matching: check if In-Reply-To header references an existing email
-      const inReplyTo = emailHeaders?.["in-reply-to"] || data.headers?.["in-reply-to"] || data.in_reply_to;
-      let threadId = `thread_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      // Thread matching: check if In-Reply-To header or references match an existing email or reply
+      const inReplyTo =
+        emailHeaders?.["in-reply-to"] ||
+        data.headers?.["in-reply-to"] ||
+        data.in_reply_to ||
+        emailHeaders?.["references"] ||
+        data.headers?.["references"];
+
+      let parentEmail: EmailRecord | undefined;
 
       if (inReplyTo) {
-        // Search if we have an email with this inboundId
-        const { emails } = await emailStorage.getEmails({ limit: 100 });
-        const parent = emails.find((e) => e.inboundId === inReplyTo || e.headers?.["message-id"] === inReplyTo);
-        if (parent) {
-          threadId = parent.threadId;
+        const cleanInReplyTo = inReplyTo.replace(/^<|>$/g, "").trim();
+        const { emails } = await emailStorage.getEmails({ limit: 200 });
+
+        parentEmail = emails.find(
+          (e) =>
+            e.inboundId === cleanInReplyTo ||
+            e.inboundId === inReplyTo ||
+            e.headers?.["message-id"] === cleanInReplyTo ||
+            e.headers?.["message-id"] === inReplyTo ||
+            (e.inboundId && cleanInReplyTo.includes(e.inboundId))
+        );
+
+        if (!parentEmail) {
+          const allReplies = await emailStorage.getAllReplies();
+          const matchedReply = allReplies.find(
+            (r) =>
+              r.resendId === cleanInReplyTo ||
+              r.resendId === inReplyTo ||
+              (r.resendId && cleanInReplyTo.includes(r.resendId))
+          );
+          if (matchedReply) {
+            parentEmail = emails.find((e) => e.id === matchedReply.emailId);
+          }
         }
       }
 
-      const emailRecord: EmailRecord = {
-        id: `msg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-        inboundId: data.email_id || data.id || eventId,
-        threadId,
-        senderName,
-        senderEmail,
-        recipientEmail,
-        subject,
-        bodyText,
-        bodyHtml,
-        receivedAt: data.created_at || new Date().toISOString(),
-        isRead: false,
-        isStarred: false,
-        isArchived: false,
-        isDeleted: false,
-        source: "inbound",
-        headers: data.headers || {},
-      };
-
-      try {
-        await emailStorage.saveEmail(emailRecord);
-      } catch (storageErr) {
-        console.warn(
-          "[Webhook] Storage write skipped (read-only filesystem):",
-          storageErr instanceof Error ? storageErr.message : storageErr
+      // Subject fallback (Re: ...) matching
+      if (!parentEmail && subject.toLowerCase().startsWith("re:")) {
+        const baseSubject = subject.replace(/^re:\s*/i, "").trim().toLowerCase();
+        const { emails } = await emailStorage.getEmails({ limit: 100 });
+        parentEmail = emails.find(
+          (e) =>
+            e.senderEmail.toLowerCase() === senderEmail.toLowerCase() &&
+            e.subject.toLowerCase().replace(/^re:\s*/i, "").trim() === baseSubject
         );
+      }
+
+      if (parentEmail) {
+        // Customer replied to an existing conversation
+        const replyRecord = {
+          id: `rep_inb_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+          emailId: parentEmail.id,
+          threadId: parentEmail.threadId,
+          to: recipientEmail,
+          from: senderEmail,
+          subject,
+          bodyText,
+          bodyHtml,
+          resendId: data.email_id || data.id,
+          sentAt: data.created_at || new Date().toISOString(),
+          status: "sent" as const,
+        };
+
+        try {
+          await emailStorage.addReply(replyRecord);
+          // Reopen / highlight parent email in admin inbox
+          await emailStorage.updateEmail(parentEmail.id, {
+            isRead: false,
+            isArchived: false,
+            isDeleted: false,
+          });
+        } catch (storageErr) {
+          console.warn("[Webhook] Reply storage write failed:", storageErr);
+        }
+      } else {
+        // Brand new inbound inquiry
+        const emailRecord: EmailRecord = {
+          id: `msg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+          inboundId: data.email_id || data.id || eventId,
+          threadId: `thread_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+          senderName,
+          senderEmail,
+          recipientEmail,
+          subject,
+          bodyText,
+          bodyHtml,
+          receivedAt: data.created_at || new Date().toISOString(),
+          isRead: false,
+          isStarred: false,
+          isArchived: false,
+          isDeleted: false,
+          source: "inbound",
+          headers: data.headers || {},
+        };
+
+        try {
+          await emailStorage.saveEmail(emailRecord);
+        } catch (storageErr) {
+          console.warn(
+            "[Webhook] Storage write skipped (read-only filesystem):",
+            storageErr instanceof Error ? storageErr.message : storageErr
+          );
+        }
       }
     }
 

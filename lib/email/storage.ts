@@ -1,4 +1,5 @@
 import fs from "fs/promises";
+import * as fsSync from "fs";
 import path from "path";
 import {
   EmailRecord,
@@ -378,5 +379,52 @@ export class JsonFileStorageAdapter implements StorageAdapter {
   }
 }
 
+function getEnvVar(key: string): string | undefined {
+  const val = process.env[key];
+  if (val && !val.startsWith("your_")) {
+    return val;
+  }
+  if (process.env.NODE_ENV !== "production") {
+    try {
+      const candidates = [
+        path.join(process.cwd(), ".env.local"),
+        path.join(process.cwd(), "my-app", ".env.local"),
+      ];
+      for (const envPath of candidates) {
+        if (fsSync.existsSync(envPath)) {
+          const content = fsSync.readFileSync(envPath, "utf-8");
+          for (const line of content.split("\n")) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith(`${key}=`)) {
+              return trimmed.substring(key.length + 1).trim();
+            }
+          }
+        }
+      }
+    } catch {}
+  }
+  return val;
+}
+
+export function createStorageAdapter(): StorageAdapter {
+  const dbUrl =
+    getEnvVar("DATABASE_URL") ||
+    getEnvVar("POSTGRES_URL") ||
+    getEnvVar("NEON_DATABASE_URL") ||
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL;
+
+  const storageType = getEnvVar("STORAGE_TYPE") || process.env.STORAGE_TYPE;
+
+  if ((dbUrl && storageType !== "file") || storageType === "postgres") {
+    if (dbUrl) {
+      const { PostgresStorageAdapter } = require("./postgres-storage");
+      return new PostgresStorageAdapter(dbUrl);
+    }
+  }
+
+  return new JsonFileStorageAdapter();
+}
+
 // Global singleton storage adapter instance
-export const emailStorage: StorageAdapter = new JsonFileStorageAdapter();
+export const emailStorage: StorageAdapter = createStorageAdapter();
