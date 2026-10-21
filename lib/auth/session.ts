@@ -13,13 +13,18 @@ function getEnvVar(key: string): string | undefined {
   // Only attempt filesystem fallback in local development (Vercel is read-only)
   if (process.env.NODE_ENV !== "production") {
     try {
-      const envPath = path.join(process.cwd(), ".env.local");
-      if (fs.existsSync(envPath)) {
-        const content = fs.readFileSync(envPath, "utf-8");
-        for (const line of content.split("\n")) {
-          const trimmed = line.trim();
-          if (trimmed.startsWith(`${key}=`)) {
-            return trimmed.substring(key.length + 1).trim();
+      const candidates = [
+        path.join(process.cwd(), ".env.local"),
+        path.join(process.cwd(), "my-app", ".env.local"),
+      ];
+      for (const envPath of candidates) {
+        if (fs.existsSync(envPath)) {
+          const content = fs.readFileSync(envPath, "utf-8");
+          for (const line of content.split("\n")) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith(`${key}=`)) {
+              return trimmed.substring(key.length + 1).trim();
+            }
           }
         }
       }

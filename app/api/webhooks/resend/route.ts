@@ -15,13 +15,18 @@ function getEnvVar(key: string): string | undefined {
   // Only attempt filesystem fallback in local development (Vercel is read-only)
   if (process.env.NODE_ENV !== "production") {
     try {
-      const envPath = path.join(process.cwd(), ".env.local");
-      if (fs.existsSync(envPath)) {
-        const content = fs.readFileSync(envPath, "utf-8");
-        for (const line of content.split("\n")) {
-          const trimmed = line.trim();
-          if (trimmed.startsWith(`${key}=`)) {
-            return trimmed.substring(key.length + 1).trim();
+      const candidates = [
+        path.join(process.cwd(), ".env.local"),
+        path.join(process.cwd(), "my-app", ".env.local"),
+      ];
+      for (const envPath of candidates) {
+        if (fs.existsSync(envPath)) {
+          const content = fs.readFileSync(envPath, "utf-8");
+          for (const line of content.split("\n")) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith(`${key}=`)) {
+              return trimmed.substring(key.length + 1).trim();
+            }
           }
         }
       }
@@ -108,33 +113,41 @@ export async function POST(req: NextRequest) {
         ? data.to[0]
         : typeof data.to === "string"
         ? data.to
-        : (process.env.RESEND_FROM_EMAIL || "hello@nettleregenerative.com");
+        : (getEnvVar("RESEND_FROM_EMAIL") || "info@nettleregenerativefarm.com");
 
       const subject = data.subject || "(No subject)";
-      let bodyText = data.text;
-      let bodyHtml = data.html;
+      let bodyText = data.text || data.snippet || data.body || data.raw?.text;
+      let bodyHtml = data.html || data.raw?.html;
       let emailHeaders = data.headers || {};
 
-      // Resend keeps the webhook lightweight; fetch the full body and HTML using email_id
+      // Resend keeps webhook payloads lightweight; attempt to fetch full body if API key allows
       const emailId = data.email_id || data.id;
       if (emailId && (!bodyText && !bodyHtml)) {
         try {
           const client = getResendClient();
-          if (client && typeof client.emails?.receiving?.get === "function") {
-            const resendResponse = await client.emails.receiving.get(emailId);
-            const fullEmail = (resendResponse as any)?.data || resendResponse;
-            if (fullEmail) {
+          if (client && typeof (client.emails as any)?.receiving?.get === "function") {
+            const resendResponse = await (client.emails as any).receiving.get(emailId);
+            if (resendResponse && !resendResponse.error) {
+              const fullEmail = resendResponse.data || resendResponse;
               bodyText = fullEmail.text || bodyText;
               bodyHtml = fullEmail.html || bodyHtml;
               emailHeaders = fullEmail.headers || emailHeaders;
+            } else if (resendResponse?.error) {
+              console.warn(
+                "[Resend Receiving Fetch]: API key is restricted or call failed:",
+                resendResponse.error.message || resendResponse.error
+              );
             }
           }
         } catch (fetchErr) {
-          console.warn("[Resend Receiving Fetch]:", fetchErr);
+          console.warn("[Resend Receiving Fetch Notice]:", fetchErr);
         }
       }
 
-      bodyText = bodyText || (bodyHtml ? bodyHtml.replace(/<[^>]+>/g, " ") : "(Empty message)");
+      bodyText =
+        bodyText ||
+        (bodyHtml ? bodyHtml.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() : "") ||
+        `Inbound message received via Resend from ${senderEmail}`;
 
       // Thread matching: check if In-Reply-To header references an existing email
       const inReplyTo = emailHeaders?.["in-reply-to"] || data.headers?.["in-reply-to"] || data.in_reply_to;
@@ -165,16 +178,17 @@ export async function POST(req: NextRequest) {
         isArchived: false,
         isDeleted: false,
         source: "inbound",
-        headers: data.headers || {},
+        headers: emailHeaders,
       };
 
       try {
         await emailStorage.saveEmail(emailRecord);
       } catch (storageErr) {
-        console.warn(
-          "[Webhook] Storage write skipped (read-only filesystem):",
+        console.error(
+          "[Webhook] Storage write failed:",
           storageErr instanceof Error ? storageErr.message : storageErr
         );
+        return NextResponse.json({ error: "Failed to persist inbound email" }, { status: 500 });
       }
     }
 

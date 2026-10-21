@@ -136,6 +136,26 @@ export default function AdminEmailsDashboard() {
     }
   }, [currentFolder, searchQuery, selectedSourceFilter, router, fetchStats]);
 
+  // Synchronize inbound emails and refresh dashboard
+  const handleManualSync = async () => {
+    setLoadingList(true);
+    try {
+      const syncRes = await fetch("/api/emails/sync", { method: "POST" });
+      if (syncRes.ok) {
+        const syncData = await syncRes.json();
+        if (syncData.newImportedCount > 0) {
+          showToast(`Synchronized ${syncData.newImportedCount} new email(s)`, "success");
+        } else if (syncData.message) {
+          showToast(syncData.message, syncData.apiKeyRestricted ? "info" : "success");
+        }
+      }
+    } catch {
+      // Ignore network sync issues and proceed with local fetch
+    } finally {
+      await fetchEmails();
+    }
+  };
+
   // Fetch detail for selected email
   const fetchEmailDetail = useCallback(async (id: string) => {
     setLoadingDetail(true);
@@ -497,8 +517,8 @@ export default function AdminEmailsDashboard() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={fetchEmails}
-            title="Refresh emails"
+            onClick={handleManualSync}
+            title="Sync & refresh emails"
             className="p-2 text-[#52665B] hover:text-[#113B27] hover:bg-[#F7F9F6] rounded-xl transition-colors"
           >
             <FaRotateRight className={`w-3.5 h-3.5 ${loadingList ? "animate-spin" : ""}`} />

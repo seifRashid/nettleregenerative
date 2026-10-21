@@ -240,6 +240,40 @@ async function runTestSuite() {
     await emailStorage.deleteEmail(parentId, true);
   });
 
+  await test("Contact form email persistence and folder querying", async () => {
+    const contactId = `msg_contact_${Date.now()}`;
+    await emailStorage.saveEmail({
+      id: contactId,
+      inboundId: `form_${Date.now()}`,
+      threadId: `thread_${contactId}`,
+      senderName: "Test Visitor",
+      senderEmail: "visitor@example.com",
+      recipientEmail: "info@nettleregenerativefarm.com",
+      subject: "Visiting the farm",
+      bodyText: "I would love to arrange a tour for our school group.",
+      receivedAt: new Date().toISOString(),
+      isRead: false,
+      isStarred: false,
+      isArchived: false,
+      isDeleted: false,
+      source: "contact_form",
+    });
+
+    const { emails: inboxEmails } = await emailStorage.getEmails({ folder: "inbox" });
+    const inInbox = inboxEmails.some((e) => e.id === contactId);
+    assert.strictEqual(inInbox, true, "Contact inquiry must appear in Inbox");
+
+    const { emails: contactEmails } = await emailStorage.getEmails({ folder: "contact_form" });
+    const inContact = contactEmails.some((e) => e.id === contactId);
+    assert.strictEqual(inContact, true, "Contact inquiry must appear in Contact Form folder");
+
+    const stats = await emailStorage.getStats();
+    assert(stats.contactForm >= 1, "Contact form stats counter must reflect submission");
+
+    // Clean up
+    await emailStorage.deleteEmail(contactId, true);
+  });
+
   await test("Event deduplication tracking", async () => {
     const eventId = `evt_svix_${Date.now()}`;
     assert.strictEqual(await emailStorage.hasEventBeenProcessed(eventId), false);

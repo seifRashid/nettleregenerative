@@ -53,7 +53,7 @@ ${message}`;
       </div>
     `;
 
-    // 1. Store in email storage (best-effort — Vercel filesystem is read-only)
+    // 1. Store in email storage
     const emailRecord: EmailRecord = {
       id: `msg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
       inboundId: submissionId,
@@ -77,34 +77,59 @@ ${message}`;
       },
     };
 
+    let storageSucceeded = false;
+    let storageError: string | null = null;
     try {
       await emailStorage.saveEmail(emailRecord);
-    } catch (storageErr) {
-      // On Vercel and other read-only runtimes the local JSON store is unavailable.
-      // Log the warning but do NOT fail the request — the Resend notification below
-      // is the primary delivery mechanism.
-      console.warn(
-        "[Contact API] Storage write skipped (read-only filesystem):",
-        storageErr instanceof Error ? storageErr.message : storageErr
-      );
+      storageSucceeded = true;
+    } catch (err) {
+      storageError = err instanceof Error ? err.message : String(err);
+      console.error("[Contact API] Storage write failed:", storageError);
     }
 
-    // 2. Trigger notification to admin if Resend is configured (non-blocking)
-    notifyAdminOfContactSubmission({
-      fullName,
-      email,
-      phone,
-      subject,
-      message,
-      preferredMethod,
-    }).catch((err) => {
-      console.warn("[Admin Notification Notice]:", err);
-    });
+    // 2. Dispatch notification to admin via Resend
+    let notificationResult: { success: boolean; resendId?: string; error?: string } = {
+      success: false,
+    };
+    try {
+      notificationResult = await notifyAdminOfContactSubmission({
+        fullName,
+        email,
+        phone,
+        subject,
+        message,
+        preferredMethod,
+      });
+    } catch (err) {
+      notificationResult = {
+        success: false,
+        resendId: undefined,
+        error: err instanceof Error ? err.message : String(err),
+      };
+      console.warn("[Contact API] Admin notification exception:", notificationResult.error);
+    }
+
+    // 3. Verify that at least one reliable persistence/delivery channel succeeded
+    if (!storageSucceeded && !notificationResult.success) {
+      return NextResponse.json(
+        {
+          error: "Unable to record or deliver your message due to a server error. Please contact us directly at info@nettleregenerativefarm.com or +254 115 198 300.",
+          details: {
+            storageError,
+            notificationError: notificationResult.error,
+          },
+        },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
       message: "Your inquiry has been successfully received. We will respond shortly.",
       submissionId,
+      emailId: emailRecord.id,
+      storedInDashboard: storageSucceeded,
+      emailDelivered: notificationResult.success,
     });
   } catch (err) {
     console.error("[Contact API Error]:", err);
