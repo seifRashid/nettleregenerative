@@ -51,7 +51,9 @@ export function FooterSection() {
               </p>
               <p className="flex items-center gap-2">
                 <FaEnvelope className="w-3 h-3 text-[#84C135]" />
-                <span>info@nettleregenerative.co.ke</span>
+                <a href="mailto:info@nettleregenerativefarm.com" className="hover:text-white transition-colors">
+                  info@nettleregenerativefarm.com
+                </a>
               </p>
               <p className="flex items-center gap-2">
                 <FaPhone className="w-3 h-3 text-[#84C135]" />

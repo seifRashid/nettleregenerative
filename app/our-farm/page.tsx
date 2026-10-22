@@ -962,7 +962,15 @@ export default function OurFarmPage() {
                         </div>
                         <div className="flex items-center gap-3 text-white/90">
                           <FaEnvelope className="w-4 h-4 text-[#84C135] shrink-0" />
-                          <span>Direct inquiries: info@nettleregenerative.com</span>
+                          <span>
+                            Direct inquiries:{" "}
+                            <a
+                              href="mailto:info@nettleregenerativefarm.com"
+                              className="text-white hover:text-[#84C135] underline transition-colors"
+                            >
+                              info@nettleregenerativefarm.com
+                            </a>
+                          </span>
                         </div>
                         <div className="flex items-center gap-3 text-white/90">
                           <FaLocationDot className="w-4 h-4 text-[#84C135] shrink-0" />

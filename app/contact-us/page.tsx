@@ -449,12 +449,12 @@ export default function ContactUsPage() {
     },
     {
       title: "Official Email",
-      value: "info@nettleregenerative.com",
+      value: "info@nettleregenerativefarm.com",
       caption: "Formal inquiries, research partnerships, and seedling bulk orders.",
       badge: "24-Hour Reply",
       icon: FaEnvelope,
       actionLabel: "Send Email",
-      actionHref: "mailto:info@nettleregenerative.com?subject=Inquiry%20from%20Website",
+      actionHref: "mailto:info@nettleregenerativefarm.com?subject=Inquiry%20from%20Website",
     },
     {
       title: "Baolala Farm Site",

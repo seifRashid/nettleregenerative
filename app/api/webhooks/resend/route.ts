@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
         ? data.to[0]
         : typeof data.to === "string"
         ? data.to
-        : (process.env.RESEND_FROM_EMAIL || "hello@nettleregenerative.com");
+        : (process.env.RESEND_FROM_EMAIL || "info@nettleregenerativefarm.com");
 
       const subject = data.subject || "(No subject)";
       let bodyText = data.text;
