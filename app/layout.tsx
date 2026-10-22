@@ -16,6 +16,11 @@ export const metadata: Metadata = {
   title: "Nettle Regenerative Farm | Kilifi County, Kenya",
   description:
     "Empowering local communities in Baolala, Kilifi County, Kenya through permaculture, sustainable food production, indigenous tree nurseries, and ecosystem restoration.",
+  icons: {
+    icon: "/images/logo.jpg",
+    shortcut: "/images/logo.jpg",
+    apple: "/images/logo.jpg",
+  },
 };
 
 export default function RootLayout({
