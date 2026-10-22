@@ -2,11 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
 import { emailStorage } from "@/lib/email/storage";
 import { EmailFilter } from "@/lib/email/storage-types";
+import { syncInboundEmailsFromResend } from "@/lib/email/sync";
 
 export async function GET(req: NextRequest) {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+  }
+
+  // Best-effort non-blocking sync with Resend receiving mailbox
+  try {
+    await syncInboundEmailsFromResend();
+  } catch (syncErr) {
+    console.warn("[Background Sync]:", syncErr);
   }
 
   try {

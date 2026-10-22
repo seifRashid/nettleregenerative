@@ -229,14 +229,14 @@ export async function POST(req: NextRequest) {
           isArchived: false,
           isDeleted: false,
           source: "inbound",
-          headers: data.headers || {},
+          headers: emailHeaders || data.headers || {},
         };
 
         try {
           await emailStorage.saveEmail(emailRecord);
         } catch (storageErr) {
-          console.warn(
-            "[Webhook] Storage write skipped (read-only filesystem):",
+          console.error(
+            "[Webhook] Storage write error:",
             storageErr instanceof Error ? storageErr.message : storageErr
           );
         }

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -99,17 +100,15 @@ export function SustainabilitySection() {
 
             {/* Primary Pill Button */}
             <FadeIn delay={0.4}>
-              <motion.a
-                href="#contact"
-                whileHover={{ scale: 1.03, y: -2 }}
-                whileTap={{ scale: 0.97 }}
-                className="group inline-flex items-center gap-3 px-8 py-4 rounded-full bg-[#113B27] text-white text-base font-semibold tracking-wide hover:bg-[#174A32] transition-all shadow-xl cursor-pointer"
+              <Link
+                href="/contact-us"
+                className="group inline-flex items-center gap-3 px-8 py-4 rounded-full bg-[#113B27] text-white text-base font-semibold tracking-wide hover:bg-[#174A32] transition-all shadow-xl cursor-pointer hover:scale-[1.03] hover:-translate-y-0.5 active:scale-[0.97]"
               >
                 <span>Visit Our Farm</span>
                 <span className="w-6 h-6 rounded-full bg-white/15 group-hover:bg-white/25 flex items-center justify-center transition-transform group-hover:translate-x-1">
                   <FaArrowRight className="w-3 h-3 text-white" />
                 </span>
-              </motion.a>
+              </Link>
             </FadeIn>
           </div>
 

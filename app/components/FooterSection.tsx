@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   FaEnvelope,
-  FaArrowRight,
   FaLocationDot,
   FaXTwitter,
   FaLinkedinIn,
@@ -14,21 +13,8 @@ import {
   FaWhatsapp,
   FaPhone,
 } from "react-icons/fa6";
-import { FadeIn } from "./MotionComponents";
 
 export function FooterSection() {
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
-
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email) {
-      setSubscribed(true);
-      setTimeout(() => setSubscribed(false), 5000);
-      setEmail("");
-    }
-  };
-
   const socialLinks = [
     { icon: FaXTwitter, label: "Twitter / X", href: "#" },
     { icon: FaLinkedinIn, label: "LinkedIn", href: "#" },
@@ -39,66 +25,8 @@ export function FooterSection() {
   return (
     <footer id="contact" className="mt-auto bg-[#091E14] text-white rounded-t-[40px] pt-16 pb-12 px-4 sm:px-8 border-t border-white/10">
       <div className="max-w-7xl mx-auto">
-        {/* Newsletter Banner */}
-        <FadeIn className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pb-16 border-b border-white/15">
-          <div className="lg:col-span-6">
-            <span className="text-xs uppercase tracking-wider text-[#84C135] font-semibold block mb-2">
-              Stay Connected
-            </span>
-            <h3 className="text-3xl sm:text-4xl font-bold tracking-tight leading-tight">
-              Join the Regenerative Movement
-            </h3>
-            <p className="text-sm text-white/70 mt-2 max-w-md">
-              Get regular updates on our permaculture workshops, seedling distributions, and
-              community impact in Kilifi County.
-            </p>
-          </div>
-
-          <div className="lg:col-span-6 flex justify-start lg:justify-end">
-            <form
-              onSubmit={handleSubscribe}
-              className="relative flex items-center w-full max-w-md bg-white/10 backdrop-blur-md rounded-full border border-white/25 p-1.5 focus-within:border-[#84C135] focus-within:ring-2 focus-within:ring-[#84C135]/40 transition-all"
-            >
-              <div className="pl-4 pr-2 text-white/60">
-                <FaEnvelope className="w-4 h-4" />
-              </div>
-              <input
-                type="email"
-                placeholder="Your email address here"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-transparent text-white placeholder-white/50 text-sm focus:outline-none py-2"
-                required
-              />
-              <motion.button
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.92 }}
-                type="submit"
-                className="w-10 h-10 rounded-full bg-white text-[#113B27] flex items-center justify-center font-bold hover:bg-[#84C135] transition-colors cursor-pointer shrink-0 shadow-md"
-                aria-label="Subscribe"
-              >
-                <FaArrowRight className="w-3.5 h-3.5 text-[#113B27]" />
-              </motion.button>
-            </form>
-          </div>
-        </FadeIn>
-
-        {/* Subscription alert banner */}
-        <AnimatePresence>
-          {subscribed && (
-            <motion.div
-              initial={{ opacity: 0, y: 8, height: 0 }}
-              animate={{ opacity: 1, y: 0, height: "auto" }}
-              exit={{ opacity: 0, y: -8, height: 0 }}
-              className="mt-4 p-3 rounded-2xl bg-[#84C135]/20 border border-[#84C135] text-[#84C135] text-xs text-center font-medium"
-            >
-              Thank you for subscribing to Nettle Regenerative Farm updates!
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* Navigation Links Tree */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-12">
           {/* Brand Col */}
           <div className="md:col-span-1">
             <div className="flex items-center gap-3.5 mb-4">
@@ -190,8 +118,8 @@ export function FooterSection() {
             <ul className="space-y-2 text-xs text-white/70">
               <li><a href="#founder" className="hover:text-[#84C135] transition-colors">Lenox Kipondah Story</a></li>
               <li><a href="#sustainability" className="hover:text-[#84C135] transition-colors">PRI Kenya Collaboration</a></li>
-              <li><a href="#contact" className="hover:text-[#84C135] transition-colors">Sponsor a Food Forest</a></li>
-              <li><a href="#contact" className="hover:text-[#84C135] transition-colors">Contact & Farm Visits</a></li>
+              <li><Link href="/contact-us" className="hover:text-[#84C135] transition-colors">Sponsor a Food Forest</Link></li>
+              <li><Link href="/contact-us" className="hover:text-[#84C135] transition-colors">Contact & Farm Visits</Link></li>
             </ul>
           </div>
         </div>

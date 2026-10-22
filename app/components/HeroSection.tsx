@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -105,17 +106,15 @@ export function HeroSection() {
             transition={{ duration: 0.7, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-wrap items-center gap-4 mb-8"
           >
-            <motion.a
-              href="#sustainability"
-              whileHover={{ scale: 1.03, y: -2 }}
-              whileTap={{ scale: 0.97 }}
-              className="group inline-flex items-center gap-3 px-7 py-3.5 rounded-full bg-white text-[#113B27] text-sm sm:text-base font-semibold tracking-wide hover:bg-[#84C135] hover:text-[#091E14] transition-all duration-300 shadow-2xl"
+            <Link
+              href="/contact-us"
+              className="group inline-flex items-center gap-3 px-7 py-3.5 rounded-full bg-white text-[#113B27] text-sm sm:text-base font-semibold tracking-wide hover:bg-[#84C135] hover:text-[#091E14] transition-all duration-300 shadow-2xl hover:scale-[1.03] hover:-translate-y-0.5 active:scale-[0.97]"
             >
               <span>Visit Our Farm</span>
               <span className="w-7 h-7 rounded-full bg-black/5 group-hover:bg-black/10 flex items-center justify-center text-xs transition-transform duration-300 group-hover:translate-x-1">
                 <FaArrowRight className="w-3 h-3 text-[#113B27]" />
               </span>
-            </motion.a>
+            </Link>
 
             <motion.a
               href="#who-we-are"

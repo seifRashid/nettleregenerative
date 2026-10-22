@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { FaArrowRight } from "react-icons/fa6";
 import {
@@ -49,15 +50,13 @@ export function ImmersiveBannerSection() {
               Where Ancient Ecological Wisdom Meets Modern Food Security.
             </h2>
             <div className="flex justify-center">
-              <motion.a
-                href="#contact"
-                whileHover={{ scale: 1.04, y: -2 }}
-                whileTap={{ scale: 0.97 }}
-                className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-white text-[#113B27] font-semibold text-sm sm:text-base hover:bg-[#84C135] hover:text-[#091E14] transition-all shadow-xl cursor-pointer"
+              <Link
+                href="/contact-us"
+                className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-white text-[#113B27] font-semibold text-sm sm:text-base hover:bg-[#84C135] hover:text-[#091E14] transition-all shadow-xl cursor-pointer hover:scale-[1.04] hover:-translate-y-0.5 active:scale-[0.97]"
               >
                 <span>Support the Movement</span>
                 <FaArrowRight className="w-3.5 h-3.5" />
-              </motion.a>
+              </Link>
             </div>
           </div>
 
