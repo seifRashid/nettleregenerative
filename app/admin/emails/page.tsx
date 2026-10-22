@@ -27,10 +27,279 @@ import {
   FaXmark,
   FaFilter,
   FaWpforms,
+  FaUser,
+  FaCopy,
+  FaCheck,
+  FaChevronDown,
+  FaChevronUp,
+  FaShieldHalved,
 } from "react-icons/fa6";
 import { EmailRecord, EmailReplyRecord, DashboardStats } from "@/lib/email/storage-types";
 
 type FolderType = "inbox" | "unread" | "starred" | "contact_form" | "sent" | "archived" | "trash";
+
+/**
+ * Intelligently separates newly written email reply content from older quoted history.
+ * Detects patterns like "On ... wrote:", "-----Original Message-----", and consecutive ">" lines.
+ */
+function parseEmailBody(text: string): { main: string; quoted: string | null } {
+  if (!text) return { main: "", quoted: null };
+
+  const quotePatterns = [
+    /\r?\n\s*On\s+[\s\S]+?wrote:\s*/i,
+    /\r?\n\s*-{3,}\s*Original Message\s*-{3,}/i,
+    /\r?\n\s*From:\s*.+?\r?\n\s*Sent:\s*/i,
+    /\r?\n\s*_{10,}/,
+  ];
+
+  for (const pattern of quotePatterns) {
+    const match = text.match(pattern);
+    if (match && match.index !== undefined) {
+      const main = text.slice(0, match.index).trim();
+      const quoted = text.slice(match.index).trim();
+      if (main.length > 0) {
+        return { main, quoted };
+      }
+    }
+  }
+
+  const lines = text.split(/\r?\n/);
+  const firstQuoteLineIndex = lines.findIndex((line) => line.trim().startsWith(">"));
+  if (firstQuoteLineIndex > 0) {
+    const main = lines.slice(0, firstQuoteLineIndex).join("\n").trim();
+    const quoted = lines.slice(firstQuoteLineIndex).join("\n").trim();
+    if (main.length > 0) {
+      return { main, quoted };
+    }
+  }
+
+  return { main: text, quoted: null };
+}
+
+/**
+ * Message Content renderer with an expandable quoted text toggle.
+ */
+function FormattedMessageContent({
+  text,
+  html,
+}: {
+  text: string;
+  html?: string | null;
+}) {
+  const { main, quoted } = useMemo(() => parseEmailBody(text), [text]);
+  const [showQuoted, setShowQuoted] = useState(false);
+
+  // If HTML is available and there's no extracted quote that needs hiding, display sanitized HTML
+  if (html && !quoted) {
+    return (
+      <div
+        dangerouslySetInnerHTML={{ __html: html }}
+        className="prose prose-sm max-w-none text-[#11231A]"
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {/* Primary message body */}
+      <div className="text-sm text-[#11231A] leading-relaxed whitespace-pre-wrap font-sans">
+        {main || text}
+      </div>
+
+      {/* Quoted conversation block (collapsible) */}
+      {quoted && (
+        <div className="pt-1.5">
+          <button
+            type="button"
+            onClick={() => setShowQuoted((prev) => !prev)}
+            className="group inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#113B27]/5 hover:bg-[#84C135]/20 text-[#52665B] hover:text-[#113B27] text-xs font-medium border border-[#113B27]/10 transition-all cursor-pointer shadow-2xs"
+            title={showQuoted ? "Hide quoted text history" : "Show quoted text history"}
+          >
+            <span className="flex items-center gap-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#84C135] group-hover:scale-125 transition-transform" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#84C135] group-hover:scale-125 transition-transform" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#84C135] group-hover:scale-125 transition-transform" />
+            </span>
+            <span className="text-[11px] font-medium font-sans">
+              {showQuoted ? "Hide quoted text" : "Show quoted text"}
+            </span>
+            {showQuoted ? (
+              <FaChevronUp className="w-2.5 h-2.5 text-[#52665B] group-hover:text-[#113B27]" />
+            ) : (
+              <FaChevronDown className="w-2.5 h-2.5 text-[#52665B] group-hover:text-[#113B27]" />
+            )}
+          </button>
+
+          {showQuoted && (
+            <div className="mt-2.5 p-3.5 rounded-2xl bg-[#F7F9F6] border-l-3 border-[#84C135] border border-[#113B27]/10 text-xs text-[#52665B] leading-relaxed whitespace-pre-wrap font-mono animate-in fade-in slide-in-from-top-1 duration-200">
+              <div className="text-[10px] uppercase tracking-wider font-bold text-[#84C135] mb-1 font-sans">
+                Quoted Email History
+              </div>
+              {quoted}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Enhanced Conversation Thread Message Card
+ */
+function ThreadReplyCard({
+  reply,
+  idx,
+  totalReplies,
+  customerName,
+  customerEmail,
+  onQuoteReply,
+  showToast,
+}: {
+  reply: EmailReplyRecord;
+  idx: number;
+  totalReplies: number;
+  customerName: string;
+  customerEmail: string;
+  onQuoteReply?: (text: string, senderName: string) => void;
+  showToast: (text: string, type?: "success" | "error" | "info") => void;
+}) {
+  const isCustomer =
+    reply.from.toLowerCase() === customerEmail.toLowerCase() ||
+    (!reply.from.toLowerCase().includes("nettleregenerativefarm.com") &&
+      !reply.from.toLowerCase().includes("nettleregenerative.com"));
+
+  const displayName = isCustomer ? (customerName || reply.from.split("@")[0]) : "Nettle Farm Team (You)";
+  const initials = isCustomer
+    ? displayName
+        .split(" ")
+        .map((p) => p[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2) || "CR"
+    : "NF";
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    showToast(`${label} copied to clipboard!`, "info");
+  };
+
+  return (
+    <div
+      className={`relative rounded-2xl p-5 sm:p-6 border shadow-xs transition-all ${
+        isCustomer
+          ? "bg-white border-[#84C135]/40 border-l-4 border-l-[#84C135] hover:shadow-md"
+          : "bg-[#F9FAF7] border-[#113B27]/15 border-l-4 border-l-[#113B27] hover:shadow-md"
+      }`}
+    >
+      {/* Header Row */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#113B27]/8">
+        <div className="flex items-center gap-3">
+          {/* Avatar Icon */}
+          <div
+            className={`w-9 h-9 rounded-full font-bold text-xs flex items-center justify-center shrink-0 shadow-xs ${
+              isCustomer
+                ? "bg-[#EBF7D9] text-[#113B27] border border-[#84C135]/40"
+                : "bg-[#113B27] text-[#84C135] border border-white/20"
+            }`}
+          >
+            {isCustomer ? initials : <FaLeaf className="w-3.5 h-3.5" />}
+          </div>
+
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-bold text-sm text-[#11231A]">{displayName}</span>
+              {isCustomer ? (
+                <span className="inline-flex items-center gap-1 text-[10px] px-2.5 py-0.5 rounded-full bg-[#EBF7D9] text-[#113B27] font-bold border border-[#84C135]/35">
+                  <FaUser className="w-2.5 h-2.5 text-[#84C135]" />
+                  Customer Reply
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-[10px] px-2.5 py-0.5 rounded-full bg-[#113B27] text-white font-bold">
+                  <FaShieldHalved className="w-2.5 h-2.5 text-[#84C135]" />
+                  Staff Reply
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2 text-xs text-[#52665B] mt-0.5">
+              <span>{isCustomer ? `From: ${reply.from}` : `Sent to: ${reply.to}`}</span>
+              <button
+                type="button"
+                onClick={() => copyToClipboard(isCustomer ? reply.from : reply.to, "Email address")}
+                className="text-[#708579] hover:text-[#113B27] p-0.5 transition-colors cursor-pointer"
+                title="Copy email address"
+              >
+                <FaCopy className="w-2.5 h-2.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Timestamp */}
+        <div className="text-right sm:self-start">
+          <span className="text-xs text-[#708579] font-medium block">
+            {new Date(reply.sentAt).toLocaleString([], {
+              dateStyle: "medium",
+              timeStyle: "short",
+            })}
+          </span>
+          <span className="text-[10px] text-[#708579]/80">
+            Reply #{idx + 1} of {totalReplies}
+          </span>
+        </div>
+      </div>
+
+      {/* Message Body with Quote Collapsing */}
+      <div className="pt-3">
+        <FormattedMessageContent text={reply.bodyText} html={reply.bodyHtml} />
+      </div>
+
+      {/* Footer Info & Actions */}
+      <div className="mt-4 pt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-[#708579] border-t border-[#113B27]/8">
+        <div className="flex items-center gap-3">
+          {/* Status Badge */}
+          {reply.status === "sent" ? (
+            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#113B27]">
+              <FaCircleCheck className="w-3 h-3 text-[#84C135]" />
+              Delivered
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700">
+              <FaCircleExclamation className="w-3 h-3 text-amber-500" />
+              {reply.status === "simulated" ? "Simulated (Dev)" : reply.status}
+            </span>
+          )}
+
+          {/* Resend ID Pill */}
+          {reply.resendId && (
+            <button
+              type="button"
+              onClick={() => copyToClipboard(reply.resendId!, "Message ID")}
+              className="inline-flex items-center gap-1 text-[10px] text-[#708579] hover:text-[#113B27] px-2 py-0.5 rounded-md bg-[#113B27]/5 hover:bg-[#113B27]/10 transition-colors cursor-pointer"
+              title={`Click to copy ID: ${reply.resendId}`}
+            >
+              <FaCopy className="w-2.5 h-2.5" />
+              <span>ID: {reply.resendId.slice(0, 8)}...</span>
+            </button>
+          )}
+        </div>
+
+        {/* Quick Actions */}
+        {isCustomer && onQuoteReply && (
+          <button
+            type="button"
+            onClick={() => onQuoteReply(reply.bodyText, displayName)}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#113B27] hover:text-[#84C135] px-2.5 py-1 rounded-lg hover:bg-[#EBF7D9]/60 transition-colors cursor-pointer"
+          >
+            <FaReply className="w-3 h-3" />
+            <span>Quote in Reply</span>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function AdminEmailsDashboard() {
   const router = useRouter();
@@ -1009,87 +1278,60 @@ export default function AdminEmailsDashboard() {
                     </div>
                   )}
 
-                  {/* Main Message Body */}
-                  <div className="pt-2 text-sm text-[#11231A] leading-relaxed whitespace-pre-wrap font-sans">
-                    {selectedEmail.bodyHtml ? (
-                      <div
-                        dangerouslySetInnerHTML={{ __html: selectedEmail.bodyHtml }}
-                        className="prose prose-sm max-w-none text-[#11231A]"
-                      />
-                    ) : (
-                      selectedEmail.bodyText
-                    )}
+                  {/* Main Message Body with quote collapsing */}
+                  <div className="pt-2">
+                    <FormattedMessageContent
+                      text={selectedEmail.bodyText}
+                      html={selectedEmail.bodyHtml}
+                    />
                   </div>
                 </div>
 
                 {/* Conversation Replies Thread */}
                 {replies.length > 0 && (
                   <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#708579]">
-                      <FaReply className="w-3 h-3" />
-                      <span>Conversation History ({replies.length})</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#708579]">
+                        <FaReply className="w-3.5 h-3.5 text-[#84C135]" />
+                        <span>Conversation History ({replies.length})</span>
+                      </div>
+                      <span className="text-xs text-[#708579]">
+                        Showing chronological message flow
+                      </span>
                     </div>
 
-                    {replies.map((reply, idx) => {
-                      const isCustomer =
-                        reply.from.toLowerCase() === selectedEmail.senderEmail.toLowerCase() ||
-                        (!reply.from.toLowerCase().includes("nettleregenerativefarm.com") &&
-                          !reply.from.toLowerCase().includes("nettleregenerative.com"));
-
-                      return (
-                        <div
+                    <div className="space-y-3">
+                      {replies.map((reply, idx) => (
+                        <ThreadReplyCard
                           key={reply.id || idx}
-                          className={`rounded-3xl p-5 border shadow-xs space-y-3 pl-6 border-l-4 ${
-                            isCustomer
-                              ? "bg-[#FCFDFB] border-l-[#84C135] border-[#84C135]/30"
-                              : "bg-white border-l-[#113B27] border-[#113B27]/10"
-                          }`}
-                        >
-                          <div className="flex items-center justify-between text-xs">
-                            <div className="flex items-center gap-2 font-bold">
-                              {isCustomer ? (
-                                <>
-                                  <span className="text-[#113B27]">{selectedEmail.senderName}</span>
-                                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#EBF7D9] text-[#113B27] font-semibold border border-[#84C135]/30">
-                                    Customer Reply
-                                  </span>
-                                </>
-                              ) : (
-                                <>
-                                  <span className="text-[#113B27]">You replied</span>
-                                  <span className="text-[10px] text-[#708579] font-normal">
-                                    via {reply.from}
-                                  </span>
-                                </>
-                              )}
-                            </div>
-                            <span className="text-[11px] text-[#708579]">
-                              {new Date(reply.sentAt).toLocaleString([], {
-                                dateStyle: "medium",
-                                timeStyle: "short",
-                              })}
-                            </span>
-                          </div>
-
-                          <div className="text-xs text-[#708579]">
-                            {isCustomer ? (
-                              <>From: <span className="text-[#11231A] font-medium">{reply.from}</span></>
-                            ) : (
-                              <>To: <span className="text-[#11231A] font-medium">{reply.to}</span></>
-                            )}
-                          </div>
-
-                          <div className="text-sm text-[#11231A] leading-relaxed whitespace-pre-wrap pt-1 font-sans">
-                            {reply.bodyText}
-                          </div>
-
-                          <div className="pt-2 flex items-center justify-between text-[10px] text-[#708579] border-t border-[#113B27]/5">
-                            <span>Status: {reply.status}</span>
-                            {reply.resendId && <span>ID: {reply.resendId}</span>}
-                          </div>
-                        </div>
-                      );
-                    })}
+                          reply={reply}
+                          idx={idx}
+                          totalReplies={replies.length}
+                          customerName={selectedEmail.senderName}
+                          customerEmail={selectedEmail.senderEmail}
+                          onQuoteReply={(text, senderName) => {
+                            const quoted = text
+                              .split("\n")
+                              .map((line) => `> ${line}`)
+                              .join("\n");
+                            setReplyBody((prev) =>
+                              prev
+                                ? `${prev}\n\nOn ${new Date(reply.sentAt).toLocaleString([], {
+                                    dateStyle: "medium",
+                                    timeStyle: "short",
+                                  })} ${senderName} wrote:\n${quoted}\n\n`
+                                : `On ${new Date(reply.sentAt).toLocaleString([], {
+                                    dateStyle: "medium",
+                                    timeStyle: "short",
+                                  })} ${senderName} wrote:\n${quoted}\n\n`
+                            );
+                            setIsReplying(true);
+                            showToast("Quoted message in reply composer", "info");
+                          }}
+                          showToast={showToast}
+                        />
+                      ))}
+                    </div>
                   </div>
                 )}
 
