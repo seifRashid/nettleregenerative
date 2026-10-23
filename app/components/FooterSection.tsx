@@ -105,23 +105,61 @@ export function FooterSection() {
               Programs
             </h4>
             <ul className="space-y-2 text-xs text-white/70">
-              <li><a href="#sustainability" className="hover:text-[#84C135] transition-colors">Permaculture Workshops</a></li>
-              <li><a href="#nursery" className="hover:text-[#84C135] transition-colors">Seedling Distribution</a></li>
-              <li><a href="#sustainability" className="hover:text-[#84C135] transition-colors">Composting & Soil Care</a></li>
-              <li><a href="#who-we-are" className="hover:text-[#84C135] transition-colors">School & Community Gardens</a></li>
+              <li>
+                <Link href="/our-programs#permaculture-workshops" className="hover:text-[#84C135] transition-colors">
+                  Permaculture Workshops
+                </Link>
+              </li>
+              <li>
+                <Link href="/our-programs#seedling-distribution" className="hover:text-[#84C135] transition-colors">
+                  Seedling Distribution
+                </Link>
+              </li>
+              <li>
+                <Link href="/our-programs#composting-soil-care" className="hover:text-[#84C135] transition-colors">
+                  Composting &amp; Soil Care
+                </Link>
+              </li>
+              <li>
+                <Link href="/our-programs#community-gardens" className="hover:text-[#84C135] transition-colors">
+                  School &amp; Community Gardens
+                </Link>
+              </li>
             </ul>
           </div>
 
           {/* Col 4 */}
           <div>
             <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
-              Impact & Partners
+              Impact &amp; Partners
             </h4>
             <ul className="space-y-2 text-xs text-white/70">
-              <li><a href="#founder" className="hover:text-[#84C135] transition-colors">Lenox Kipondah Story</a></li>
-              <li><a href="#sustainability" className="hover:text-[#84C135] transition-colors">PRI Kenya Collaboration</a></li>
-              <li><Link href="/contact-us" className="hover:text-[#84C135] transition-colors">Sponsor a Food Forest</Link></li>
-              <li><Link href="/contact-us" className="hover:text-[#84C135] transition-colors">Contact & Farm Visits</Link></li>
+              <li>
+                <Link href="/about-us#founder" className="hover:text-[#84C135] transition-colors">
+                  Lenox Kipondah Story
+                </Link>
+              </li>
+              <li>
+                <Link href="/about-us#pri-kenya" className="hover:text-[#84C135] transition-colors">
+                  PRI Kenya Collaboration
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact-us?subject=Sponsor%20a%20Food%20Forest%20%2F%20Agroforestry#contact-form"
+                  className="hover:text-[#84C135] transition-colors"
+                >
+                  Sponsor a Food Forest
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact-us?subject=Schedule%20a%20Farm%20Visit%20%26%20Tour#contact-form"
+                  className="hover:text-[#84C135] transition-colors"
+                >
+                  Contact &amp; Farm Visits
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

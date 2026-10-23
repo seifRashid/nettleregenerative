@@ -8,7 +8,7 @@ import { FadeIn } from "./MotionComponents";
 
 export function AboutSection() {
   return (
-    <section id="who-we-are" className="py-20 sm:py-28 px-4 sm:px-8 bg-white border-y border-[#113B27]/10">
+    <section id="who-we-are" className="py-20 sm:py-28 px-4 sm:px-8 bg-white border-y border-[#113B27]/10 scroll-mt-24 sm:scroll-mt-28">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Visual Column (Left) */}
@@ -74,7 +74,7 @@ export function AboutSection() {
 
             {/* Highlight Box: Founder Insight */}
             <FadeIn delay={0.2} className="w-full">
-              <div id="founder" className="p-6 rounded-2xl bg-[#F7F9F6] border border-[#113B27]/10 mb-8 hover:border-[#84C135]/40 transition-colors">
+              <div id="founder" className="p-6 rounded-2xl bg-[#F7F9F6] border border-[#113B27]/10 mb-8 hover:border-[#84C135]/40 transition-colors scroll-mt-24 sm:scroll-mt-28">
                 <h4 className="text-sm font-bold text-[#113B27] uppercase tracking-wider mb-2 flex items-center gap-2">
                   <FaSeedling className="w-4 h-4 text-[#84C135]" />
                   <span>Founder&apos;s Mission & Resilience</span>

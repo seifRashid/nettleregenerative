@@ -32,6 +32,8 @@ export default function OurProgramsPage() {
   const programs = [
     {
       id: "01",
+      slug: "permaculture-workshops",
+      extraSlug: "composting-soil-care",
       icon: FaGraduationCap,
       category: "Hands-on Education",
       title: "Regenerative Agriculture Training",
@@ -57,6 +59,7 @@ export default function OurProgramsPage() {
     },
     {
       id: "02",
+      slug: "community-gardens",
       icon: FaWheatAwn,
       category: "Grassroots Food Sovereignty",
       title: "Community Gardens Project",
@@ -81,6 +84,7 @@ export default function OurProgramsPage() {
     },
     {
       id: "03",
+      slug: "seedling-distribution",
       icon: FaTree,
       category: "Reforestation & Nursery",
       title: "Tree Planting & Environmental Care",
@@ -106,6 +110,7 @@ export default function OurProgramsPage() {
     },
     {
       id: "04",
+      slug: "women-youth-empowerment",
       icon: FaUsers,
       category: "Inclusive Economic Mobility",
       title: "Youth & Women Empowerment through Farming",
@@ -370,11 +375,21 @@ export default function OurProgramsPage() {
                 const isEven = index % 2 === 1;
 
                 return (
-                  <FadeIn
+                  <div
                     key={program.id}
-                    yOffset={32}
-                    className="p-6 sm:p-10 rounded-[32px] bg-white border border-[#113B27]/10 shadow-sm hover:shadow-xl transition-all duration-300"
+                    id={program.slug}
+                    className="scroll-mt-24 sm:scroll-mt-28 relative"
                   >
+                    {program.extraSlug && (
+                      <span
+                        id={program.extraSlug}
+                        className="absolute -top-24 sm:-top-28 pointer-events-none"
+                      />
+                    )}
+                    <FadeIn
+                      yOffset={32}
+                      className="p-6 sm:p-10 rounded-[32px] bg-white border border-[#113B27]/10 shadow-sm hover:shadow-xl transition-all duration-300"
+                    >
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
                       {/* Visual Image Column (Alternates based on odd/even) */}
                       <div className={`lg:col-span-5 ${isEven ? "lg:order-2" : "lg:order-1"}`}>
@@ -478,8 +493,9 @@ export default function OurProgramsPage() {
                       </div>
                     </div>
                   </FadeIn>
-                );
-              })}
+                </div>
+              );
+            })}
             </div>
           </div>
         </section>

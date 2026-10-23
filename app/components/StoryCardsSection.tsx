@@ -41,7 +41,7 @@ export function StoryCardsSection() {
   ];
 
   return (
-    <section id="nursery" className="py-20 sm:py-28 px-4 sm:px-8 bg-[#F7F9F6]">
+    <section id="nursery" className="py-20 sm:py-28 px-4 sm:px-8 bg-[#F7F9F6] scroll-mt-24 sm:scroll-mt-28">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <FadeIn className="text-center max-w-2xl mx-auto mb-16">

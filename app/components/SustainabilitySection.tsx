@@ -37,7 +37,7 @@ export function SustainabilitySection() {
   }, [shouldReduceMotion]);
 
   return (
-    <section id="sustainability" className="py-20 sm:py-28 px-4 sm:px-8 bg-white border-y border-[#113B27]/10">
+    <section id="sustainability" className="py-20 sm:py-28 px-4 sm:px-8 bg-white border-y border-[#113B27]/10 scroll-mt-24 sm:scroll-mt-28">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left Narrative Column */}

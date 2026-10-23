@@ -306,7 +306,7 @@ export default function AboutUsPage() {
         {/* ──────────────────────────────────────────────────────────
             3. OUR FOUNDER'S STORY (EDITORIAL SECTION)
         ────────────────────────────────────────────────────────── */}
-        <section id="founder" className="py-20 sm:py-28 px-4 sm:px-8 bg-[#F7F9F6] border-b border-[#113B27]/10">
+        <section id="founder" className="py-20 sm:py-28 px-4 sm:px-8 bg-[#F7F9F6] border-b border-[#113B27]/10 scroll-mt-24 sm:scroll-mt-28">
           <div className="max-w-7xl mx-auto">
             <FadeIn className="text-center max-w-2xl mx-auto mb-16">
               <span className="text-xs sm:text-sm font-semibold tracking-wider uppercase text-[#113B27]/80 bg-[#113B27]/10 px-4 py-1.5 rounded-full inline-block mb-3">
@@ -361,7 +361,14 @@ export default function AboutUsPage() {
 
                 {/* Highlight Quote Box */}
                 <FadeIn delay={0.25}>
-                  <div className="p-6 rounded-2xl bg-white border-l-4 border-[#84C135] shadow-sm">
+                  <div
+                    id="pri-kenya"
+                    className="p-6 rounded-2xl bg-white border-l-4 border-[#84C135] shadow-sm scroll-mt-28"
+                  >
+                    <div className="flex items-center gap-2 mb-2 text-xs font-bold uppercase tracking-wider text-[#3B660E]">
+                      <FaGraduationCap className="w-4 h-4 text-[#84C135]" />
+                      <span>Certified PRI Kenya Collaboration</span>
+                    </div>
                     <p className="text-sm sm:text-base text-[#113B27] font-semibold italic">
                       &ldquo;His journey led him to study Permaculture — a regenerative form of farming that rebuilds soil health and supports ecosystems — at the Permaculture Research Institute, Kenya.&rdquo;
                     </p>

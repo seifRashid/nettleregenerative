@@ -307,6 +307,7 @@ function ContactFormContent() {
               <option value="Schedule a Farm Visit & Tour">Schedule a Farm Visit & Tour</option>
               <option value="Permaculture Training & Workshops">Permaculture Training & Workshops</option>
               <option value="Indigenous Tree Seedlings & Nursery Hub">Indigenous Tree Seedlings & Nursery Hub</option>
+              <option value="Sponsor a Food Forest / Agroforestry">Sponsor a Food Forest / Agroforestry</option>
               <option value="Partnership & Institutional Collaboration">Partnership & Institutional Collaboration</option>
               <option value="Volunteer & Community Engagement">Volunteer & Community Engagement</option>
               <option value="General Inquiry">General Inquiry</option>
@@ -645,7 +646,7 @@ export default function ContactUsPage() {
         {/* ──────────────────────────────────────────────────────────
             3. DIRECT INQUIRIES: CONTACT FORM
         ────────────────────────────────────────────────────────── */}
-        <section className="py-20 sm:py-28 px-4 sm:px-8 bg-[#F7F9F6] border-b border-[#113B27]/10">
+        <section id="contact-form" className="py-20 sm:py-28 px-4 sm:px-8 bg-[#F7F9F6] border-b border-[#113B27]/10 scroll-mt-20 sm:scroll-mt-24">
           <div className="max-w-7xl mx-auto">
             {/* Centered Section Header */}
             <FadeIn className="max-w-3xl mx-auto text-center mb-12 sm:mb-16">
