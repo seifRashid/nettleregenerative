@@ -54,7 +54,7 @@ export default function OurProgramsPage() {
       image: "/images/learn.jpg",
       imageAlt: "Farmers learning hands-on regenerative agriculture methods at Nettle Farm",
       ctaText: "Enroll / Inquire for Training",
-      ctaHref: "/contact-us?subject=Regenerative%20Agriculture%20Training",
+      ctaHref: "/contact-us?subject=Regenerative%20Agriculture%20Training#contact-form",
       accentColor: "bg-[#113B27] text-[#84C135]",
     },
     {
@@ -79,7 +79,7 @@ export default function OurProgramsPage() {
       image: "/images/Lenox with tomatoes.jpg",
       imageAlt: "Lenox Chome with organic community garden tomatoes in Kilifi County",
       ctaText: "Start a Community Garden",
-      ctaHref: "/contact-us?subject=Community%20Gardens%20Project",
+      ctaHref: "/contact-us?subject=Community%20Gardens%20Project#contact-form",
       accentColor: "bg-[#84C135] text-[#091E14]",
     },
     {
@@ -105,7 +105,7 @@ export default function OurProgramsPage() {
       image: "/images/nursery 2.jpg",
       imageAlt: "Community plant nursery with indigenous and fruit seedlings in Baolala",
       ctaText: "Order Seedlings & Inquire",
-      ctaHref: "/contact-us?subject=Tree%20Planting%20%26%20Environmental%20Care",
+      ctaHref: "/contact-us?subject=Tree%20Planting%20%26%20Environmental%20Care#contact-form",
       accentColor: "bg-[#3B660E] text-[#EBF7D9]",
     },
     {
@@ -130,7 +130,7 @@ export default function OurProgramsPage() {
       image: "/images/who we are.jpg",
       imageAlt: "Local women and youth participating in regenerative agriculture empowerment in Kenya",
       ctaText: "Partner on Empowerment",
-      ctaHref: "/contact-us?subject=Youth%20%26%20Women%20Empowerment",
+      ctaHref: "/contact-us?subject=Youth%20%26%20Women%20Empowerment#contact-form",
       accentColor: "bg-[#654320] text-[#F7F9F6]",
     },
   ];

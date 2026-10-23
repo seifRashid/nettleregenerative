@@ -41,10 +41,59 @@ const FARM_COORDINATES = {
 const GOOGLE_MAPS_URL = `https://www.google.com/maps/dir/?api=1&destination=${FARM_COORDINATES.lat},${FARM_COORDINATES.lng}`;
 const APPLE_MAPS_URL = `https://maps.apple.com/?daddr=${FARM_COORDINATES.lat},${FARM_COORDINATES.lng}`;
 
+// Predefined base subjects
+const BASE_SUBJECT_OPTIONS = [
+  "Schedule a Farm Visit & Tour",
+  "Regenerative Agriculture Training",
+  "Community Gardens Project",
+  "Tree Planting & Environmental Care",
+  "Youth & Women Empowerment",
+  "Permaculture Training & Workshops",
+  "Indigenous Tree Seedlings & Nursery Hub",
+  "Sponsor a Food Forest / Agroforestry",
+  "Partnership & Institutional Collaboration",
+  "Volunteer & Community Engagement",
+  "General Inquiry",
+];
+
+// Contextual message starter drafts based on subject
+const DEFAULT_MESSAGES: Record<string, string> = {
+  "Regenerative Agriculture Training":
+    "Hello Nettle Farm team, I would like to inquire about enrolling in the Regenerative Agriculture Training program at Baolala Demonstration Farm.",
+  "Community Gardens Project":
+    "Hello Nettle Farm team, I would like to inquire about participating in or establishing a Community Garden project with our group.",
+  "Tree Planting & Environmental Care":
+    "Hello Nettle Farm team, I would like to order indigenous tree seedlings from your nursery and learn more about reforestation initiatives.",
+  "Youth & Women Empowerment":
+    "Hello Nettle Farm team, I would like to explore partnership and participation opportunities for the Youth & Women Empowerment program.",
+  "Sponsor a Food Forest / Agroforestry":
+    "Hello Nettle Farm team, I am interested in sponsoring a food forest plot in Kilifi County to restore indigenous biodiversity and support food security.",
+  "Schedule a Farm Visit & Tour":
+    "Hello Nettle Farm team, I would like to schedule a guided tour and visit to the Baolala Demonstration Farm.",
+  "Visit Our Farm":
+    "Hello Nettle Farm team, I would like to schedule a visit to the Baolala Demonstration Farm.",
+  "Schedule a Farm Visit":
+    "Hello Nettle Farm team, I would like to schedule a visit to the Baolala Demonstration Farm.",
+  "Farm Zone Inquiry":
+    "Hello Nettle Farm team, I would like to inquire about your demonstration farm zones in Baolala.",
+  "Permaculture Training & Workshops":
+    "Hello Nettle Farm team, I would like to inquire about your upcoming permaculture training sessions and workshops.",
+  "Indigenous Tree Seedlings & Nursery Hub":
+    "Hello Nettle Farm team, I would like to order indigenous seedlings from your nursery hub in Baolala.",
+  "Partnership & Institutional Collaboration":
+    "Hello Nettle Farm team, I would like to discuss a potential partnership and institutional collaboration with Nettle Regenerative.",
+  "Volunteer & Community Engagement":
+    "Hello Nettle Farm team, I am interested in volunteering and getting involved in community activities at Nettle Farm.",
+};
+
 // Contact Form inner component utilizing useSearchParams
 function ContactFormContent() {
   const searchParams = useSearchParams();
-  const initialSubject = searchParams.get("subject") || "Schedule a Farm Visit & Tour";
+  const urlSubject = searchParams.get("subject")?.trim();
+  const urlMessage = searchParams.get("message")?.trim();
+
+  const initialSubject = urlSubject || "Schedule a Farm Visit & Tour";
+  const initialMessage = urlMessage || (urlSubject ? DEFAULT_MESSAGES[urlSubject] || "" : "");
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -52,20 +101,44 @@ function ContactFormContent() {
     phone: "",
     subject: initialSubject,
     preferredMethod: "email",
-    message: "",
+    message: initialMessage,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  // Sync subject if URL search parameter changes
+  // Sync subject & message if URL search parameters change
   useEffect(() => {
-    const paramSubject = searchParams.get("subject");
+    const paramSubject = searchParams.get("subject")?.trim();
+    const paramMessage = searchParams.get("message")?.trim();
+
     if (paramSubject) {
-      setFormData((prev) => ({ ...prev, subject: paramSubject }));
+      setFormData((prev) => {
+        const isDefaultOrEmpty =
+          !prev.message || Object.values(DEFAULT_MESSAGES).includes(prev.message);
+        return {
+          ...prev,
+          subject: paramSubject,
+          message: paramMessage || (isDefaultOrEmpty ? DEFAULT_MESSAGES[paramSubject] || prev.message : prev.message),
+        };
+      });
+    } else if (paramMessage) {
+      setFormData((prev) => ({ ...prev, message: paramMessage }));
     }
   }, [searchParams]);
+
+  const handleSubjectChange = (newSubject: string) => {
+    setFormData((prev) => {
+      const isDefaultOrEmpty =
+        !prev.message || Object.values(DEFAULT_MESSAGES).includes(prev.message);
+      return {
+        ...prev,
+        subject: newSubject,
+        message: isDefaultOrEmpty ? (DEFAULT_MESSAGES[newSubject] || "") : prev.message,
+      };
+    });
+  };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -301,16 +374,18 @@ function ContactFormContent() {
               id="subject"
               name="subject"
               value={formData.subject}
-              onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+              onChange={(e) => handleSubjectChange(e.target.value)}
               className="w-full px-4 py-3 rounded-2xl bg-[#F7F9F6] border border-[#113B27]/15 text-sm text-[#11231A] appearance-none focus:outline-none focus:bg-white focus:border-[#84C135] focus:ring-2 focus:ring-[#84C135]/30 cursor-pointer pr-10"
             >
-              <option value="Schedule a Farm Visit & Tour">Schedule a Farm Visit & Tour</option>
-              <option value="Permaculture Training & Workshops">Permaculture Training & Workshops</option>
-              <option value="Indigenous Tree Seedlings & Nursery Hub">Indigenous Tree Seedlings & Nursery Hub</option>
-              <option value="Sponsor a Food Forest / Agroforestry">Sponsor a Food Forest / Agroforestry</option>
-              <option value="Partnership & Institutional Collaboration">Partnership & Institutional Collaboration</option>
-              <option value="Volunteer & Community Engagement">Volunteer & Community Engagement</option>
-              <option value="General Inquiry">General Inquiry</option>
+              {/* If custom subject from URL is not in base list, dynamically add it so it remains selected */}
+              {formData.subject && !BASE_SUBJECT_OPTIONS.includes(formData.subject) && (
+                <option value={formData.subject}>{formData.subject}</option>
+              )}
+              {BASE_SUBJECT_OPTIONS.map((subj) => (
+                <option key={subj} value={subj}>
+                  {subj}
+                </option>
+              ))}
             </select>
             <FaChevronDown className="w-3.5 h-3.5 text-[#52665B] absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
